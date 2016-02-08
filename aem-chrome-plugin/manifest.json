@@ -1,0 +1,26 @@
+{
+  "name": "AEMPanel",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Devtools panel for AEM development",
+  "devtools_page": "devtools.html",
+  "options_page": "options.html",
+  "background": {
+    "scripts": [
+      "vendor/assets/javascripts/jquery-2.2.0.min.js",
+      "assets/javascripts/background.js"
+    ]
+  },
+  "permissions": [
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "icons": {
+     "16": "assets/images/AEMPanel_Logo_16x16.png",
+     "48": "assets/images/AEMPanel_Logo_48x48.png",
+    "128": "assets/images/AEMPanel_Logo_128x128.png"
+  }
+}

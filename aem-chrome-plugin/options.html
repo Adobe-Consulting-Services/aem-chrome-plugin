@@ -1,0 +1,42 @@
+<html ng-app="aem-panel-app">
+  <head>
+    <link rel="stylesheet" type="text/css" href="vendor/assets/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/options.css">
+    <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
+    <script src="vendor/assets/javascripts/sugar-1.3.6.min.js"></script>
+    <script src="vendor/assets/javascripts/angular.min.js"></script>
+    <script src="assets/javascripts/app.js"></script>
+    <script src="assets/javascripts/options-controller.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h2>
+        <img src="assets/images/AEMPanel_Logo_48x48.png"/>
+        AEM Panel
+      </h2>
+      <form class="form-options" ng-controller="OptionsCtrl">
+        <legend>Options</legend>
+        <label class="text">
+          Host
+          <br/>
+          <input type="text" ng-model="options.host"/>
+        </label>
+        <label class="text">
+          Web Console User
+          <br/>
+          <input type="text" ng-model="options.user"/>
+        </label>
+        <label class="text">
+          Web Console Password
+          <br/>
+          <input type="text" ng-model="options.password"/>
+        </label>
+        <label class="text">
+          Sling Tracer Ids <em>(comma delimited)</em>
+          <br/>
+          <input type="text" ng-model="options.tracerIds"/>
+        </label>
+      </form>
+    </div>
+  </body>
+</html>
