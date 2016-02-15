@@ -1,5 +1,5 @@
 {
-  "name": "AEMPanel",
+  "name": "AEM Chrome Plug-in",
   "version": "0.0.1",
   "manifest_version": 2,
   "description": "Devtools panel for AEM development",
@@ -8,7 +8,7 @@
   "background": {
     "scripts": [
       "vendor/assets/javascripts/jquery-2.2.0.min.js",
-      "assets/javascripts/background.js"
+      "assets/javascripts/background/background.js"
     ]
   },
   "permissions": [
@@ -19,8 +19,8 @@
     "https://*/*"
   ],
   "icons": {
-     "16": "assets/images/AEMPanel_Logo_16x16.png",
-     "48": "assets/images/AEMPanel_Logo_48x48.png",
-    "128": "assets/images/AEMPanel_Logo_128x128.png"
+     "16": "assets/images/aem-chrome-plugin_logo_16x16.png",
+     "48": "assets/images/aem-chrome-plugin_logo_48x48.png",
+    "128": "assets/images/aem-chrome-plugin_logo_128x128.png"
   }
 }

@@ -9,22 +9,22 @@ var tracer = (function(global){
     var deactivationCallback;
 
     api.registerTab = function(tabId){
-        console.assert(tabId != undefined);
+        console.assert(typeof tabId !== 'undefined');
         tabs[tabId] = true;
         tabCount++;
         tabCountChanged();
-        console.log("Registered tab " + tabId)
+        console.log("Registered tab " + tabId);
     };
 
     api.unregisterTab = function(tabId){
         delete tabs[tabId];
         tabCount--;
         tabCountChanged();
-        console.log("Unregisterd " + tabId)
+        console.log("Unregisterd " + tabId);
     };
 
     api.shouldInjectHeaders = function(tabId) {
-        return tabs.hasOwnProperty(tabId)
+        return tabs.hasOwnProperty(tabId);
     };
 
     api.registerListener = function (activate, deactivate) {
@@ -33,10 +33,10 @@ var tracer = (function(global){
     };
 
     var tabCountChanged = function () {
-        if (tabCount <= 0 && deactivationCallback != undefined && listenerRegistered){
+        if (tabCount <= 0 && (typeof deactivationCallback !== 'undefined') && listenerRegistered){
             deactivationCallback();
             listenerRegistered = false;
-        } else if (tabCount > 0 && activationCallback != undefined && !listenerRegistered){
+        } else if (tabCount > 0 && (typeof activationCallback !== 'undefined') && !listenerRegistered){
             activationCallback();
             listenerRegistered = true;
         }
@@ -52,8 +52,8 @@ var tracer = (function(global){
  * Initialize the local storate AEM Panel options if they do not already exist.
  * This triggers for first use of the plug-in or when local storage has been cleared.
  **/
-if (!localStorage.getItem('aempanel.options')) {
-  localStorage.setItem('aempanel.options',
+if (!localStorage.getItem('aem-chrome-plugin.options')) {
+  localStorage.setItem('aem-chrome-plugin.options',
       JSON.stringify({
           user: 'admin',
           password: 'admin',
@@ -66,10 +66,10 @@ if (!localStorage.getItem('aempanel.options')) {
 
 
 chrome.runtime.onConnect.addListener(function(port) {
-    console.assert(port.name == "aem-panel");
+    console.assert(port.name == "aem-chrome-plugin");
     var tabId;
     port.onMessage.addListener(function(msg) {
-        var action = msg.action
+        var action = msg.action;
         if (action === "register"){
             tabId = msg.tabId;
             tracer.registerTab(tabId);
@@ -77,8 +77,8 @@ chrome.runtime.onConnect.addListener(function(port) {
     });
 
     port.onDisconnect.addListener(function(msg){
-        if (tabId != undefined) {
-            tracer.unregisterTab(tabId)
+        if (typeof tabId !== 'undefined') {
+            tracer.unregisterTab(tabId);
         }
     });
 });
@@ -89,9 +89,9 @@ chrome.runtime.onConnect.addListener(function(port) {
  * > message.action => updateURLFilter
  **/
 chrome.runtime.onMessage.addListener(
-  function(message, sender, sendResponse) {
+  function(message, sender, callback) {
     if (message.action === 'getSlingTracerJSON') {
-      getSlingTracerJSON(message, sender, sendResponse)
+      getSlingTracerJSON(message, sender, callback);
       return true;
     } else if (message.action === 'updateURLFilter') {
       // sync the urlFilter from AEMPanel to background.js
@@ -103,9 +103,9 @@ chrome.runtime.onMessage.addListener(
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
 function getSlingTracerJSON(request, sender, sendResponse) {
-  var options = JSON.parse(localStorage.getItem('aempanel.options')),
+  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
       callback = sendResponse,
-      // Handle servlet context
+      // Servlet context can be supported by adding to the options.host configuration
       url = options.host + '/system/console/tracer/' + request.requestId + '.json',
       username = options.user,
       password = options.password;
@@ -122,7 +122,7 @@ function getSlingTracerJSON(request, sender, sendResponse) {
       callback(d);
     }
   });
-};
+}
 
 
 var injectHeaderListener = function (details) {
@@ -135,7 +135,7 @@ var injectHeaderListener = function (details) {
 
   console.log('Adding Sling-Tracer headers for: ' + details.url);
 
-  options = JSON.parse(localStorage.getItem('aempanel.options'));
+  options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
 
   if (tracer.shouldInjectHeaders(details.tabId)) {
     details.requestHeaders.push({

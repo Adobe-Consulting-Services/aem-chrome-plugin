@@ -1,6 +1,14 @@
-angular.module('aem-panel-app')
-/** Controller **/
-.controller('TransactionsCtrl', ['$scope', 'removeHostFilter', function($scope, removeHostFilter) {
+angular.module('aem-chrome-plugin-app')
+/** Transactions Controller **/
+.controller('TransactionsCtrl', [
+    '$scope',
+    'removeHostFilter',
+    'CommunicationsService',
+    function( $scope,
+              removeHostFilter,
+              communications,
+              dividers) {
+
   var MAX_TRANSACTIONS = 25;
 
   // Data
@@ -25,6 +33,9 @@ angular.module('aem-panel-app')
     if (chrome && chrome.runtime) {
       chrome.runtime.sendMessage({ action: 'updateURLFilter', urlFilter: $scope.controls.urlFilter }, function(response) {});
     }
+
+    // Start listening for Requests
+    communications.listen($scope);
   };
 
   $scope.transactions = function() {
@@ -79,7 +90,7 @@ angular.module('aem-panel-app')
   };
 
   $scope.processTransaction = function(transaction, data) {
-    $scope.transactionKeys.unshift(transaction.key);
+    $scope.transactionKeys.push(transaction.key);
     $scope.transactionMap[transaction.key] = transaction;
 
     angular.forEach(data, function(value, dataType) {
@@ -116,14 +127,15 @@ angular.module('aem-panel-app')
         map[key] = [data];
       }
     } else {
-      value.push(data)
+      value.push(data);
     }
   };
 
   $scope.removeTransactions = function(max) {
     var key;
     while ($scope.transactionKeys.length > max) {
-        key = $scope.transactionKeys.pop();
+        // Remove from front of array
+        key = $scope.transactionKeys.shift();
         delete $scope.transactionMap[key];
         delete $scope.logMap[key];
         delete $scope.queryMap[key];
