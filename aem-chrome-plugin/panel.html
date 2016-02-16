@@ -65,7 +65,7 @@
                 <td class="status">{{ transaction.response.status }}</td>
                 <td class="url ellipsis">{{ transaction.request.url | removeHost }}</td>
                 <td class="method">{{ transaction.request.method }}</td>
-                <td class="duration">{{ transaction.time | number: 0 }} ms</td>
+                <td class="duration">{{ transaction.time | number: 0 }}ms</td>
               </tr>
               <tr class="filler">
                 <td class="status"></td>
@@ -102,11 +102,13 @@
                 </li>
                 <!-- Queries Tab -->
                 <li class="tabbed-pane-header-tab">
-                  <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries</a>
+                  <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries
+                    <span ng-show="activeTracerData().queries && activeTracerData().queries.length > 0">( {{ activeTracerData().queries.length }} )</span></a>
                 </li>
                 <!-- Timing -->
                 <li class="tabbed-pane-header-tab">
-                  <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing ( {{ activeTracerData().time }}ms ) </a>
+                  <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing
+                    <span ng-show="activeTracerData().time > 0">( {{ activeTracerData().time || 0 }}ms )</a></span>
                 </li>
 
               </ul>
@@ -149,7 +151,10 @@
             <div id="tab-queries">
               <table id="queries">
                 <tr ng-repeat="entry in activeTracerData().queries track by $index">
-                  <td>{{ ::entry }}</td>
+                  <td>
+                    <p ng-show="entry.caller"><strong>Caller: {{ ::entry.caller }}</strong></p>
+                    <p>{{ ::entry.query}}</p>
+                  </td>
                 </tr>
               </table>
             </div>
@@ -158,7 +163,14 @@
             <div id="tab-timing">
               <table id="timing">
                 <tr>
-                  <td>Derived from Request Progress data</td>
+                  <td>
+                    <ul class="params-list">
+                      <li>Server time: {{ (activeTracerData().time || 0) | number: 0 }}ms</li>
+                      <li>Network time: {{ activeRequest().time - (activeTracerData().time || 0) | number: 0 }}ms</li>
+                      <li>Total time: {{ activeRequest().time | number: 0 }}ms</li>
+                    </ul>
+                    <p>Detailed timing to be derived from request progress</p>
+                    </td>
                 </tr>
               </table>
             </div>
