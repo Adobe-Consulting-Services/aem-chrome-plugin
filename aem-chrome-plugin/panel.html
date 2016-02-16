@@ -153,7 +153,8 @@
                 <tr ng-repeat="entry in activeTracerData().queries track by $index">
                   <td>
                     <p ng-show="entry.caller"><strong>Caller: {{ ::entry.caller }}</strong></p>
-                    <p>{{ ::entry.query}}</p>
+                    <p><strong>Query:</strong> {{ ::entry.query}}</p>
+                    <p><strong>Plan:</strong> {{ ::entry.plan}}</p>
                   </td>
                 </tr>
               </table>
