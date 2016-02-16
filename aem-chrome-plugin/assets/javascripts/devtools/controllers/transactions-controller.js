@@ -6,8 +6,7 @@ angular.module('aem-chrome-plugin-app')
     'CommunicationsService',
     function( $scope,
               removeHostFilter,
-              communications,
-              dividers) {
+              communications) {
 
   var MAX_TRANSACTIONS = 25;
 
@@ -19,9 +18,7 @@ angular.module('aem-chrome-plugin-app')
   };
 
   $scope.transactionKeys = [];
-  $scope.transactionMap = {};
-  $scope.logMap = {};
-  $scope.queryMap = {};
+  $scope.transactions = {};
 
   $scope.$watch('controls.urlFilter', function(value) {
     if (chrome && chrome.runtime) {
@@ -40,7 +37,7 @@ angular.module('aem-chrome-plugin-app')
 
   $scope.transactions = function() {
     return $scope.transactionKeys.map(function(key) {
-      return $scope.transactionMap[key];
+      return $scope.transactions[key];
     });
   };
 
@@ -48,21 +45,20 @@ angular.module('aem-chrome-plugin-app')
 
   $scope.clear = function() {
     $scope.transactionKeys = [];
-    $scope.transactionMap = {};
-    $scope.logMap = {};
-    $scope.queryMap = {};
+    $scope.transactions = {};
   };
 
   $scope.activeRequest = function() {
-    return $scope.activeKey ? $scope.transactionMap[$scope.activeKey] : null;
+    return $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
   };
 
-  $scope.activeQueries = function() {
-    return $scope.queryMap[$scope.activeKey];
-  };
-
-  $scope.activeLog = function() {
-    return $scope.logMap[$scope.activeKey];
+  $scope.activeTracerData = function() {
+    var transaction = $scope.activeRequest();
+    if (transaction) {
+        return transaction.tracerData;
+    } else {
+      return null;
+    }
   };
 
   $scope.setActive = function(transactionId) {
@@ -90,45 +86,13 @@ angular.module('aem-chrome-plugin-app')
   };
 
   $scope.processTransaction = function(transaction, data) {
+    transaction.tracerData = data;
     $scope.transactionKeys.push(transaction.key);
-    $scope.transactionMap[transaction.key] = transaction;
-
-    angular.forEach(data, function(value, dataType) {
-      $scope.processTransactionData(transaction, dataType, value);
-    });
+    $scope.transactions[transaction.key] = transaction;
 
     $scope.$apply(function() {
       $scope.removeTransactions($scope.getMaxTransactions());
     });
-  };
-
-  $scope.processTransactionData = function(transaction, dataType, data) {
-    switch(dataType) {
-      case "logs":
-
-        $scope.pushToMap($scope.logMap, transaction.key, data);
-        break;
-
-      case "queries":
-        $scope.pushToMap($scope.queryMap, transaction.key, data);
-        break;
-
-      default:
-        console.log('Data-type not supported: ' + name);
-    }
-  };
-
-  $scope.pushToMap = function(map, key, data) {
-    var value = map[key];
-    if (typeof value === 'undefined') {
-      if (angular.isArray(data)) {
-        map[key] = data;
-      } else {
-        map[key] = [data];
-      }
-    } else {
-      value.push(data);
-    }
   };
 
   $scope.removeTransactions = function(max) {
@@ -136,9 +100,7 @@ angular.module('aem-chrome-plugin-app')
     while ($scope.transactionKeys.length > max) {
         // Remove from front of array
         key = $scope.transactionKeys.shift();
-        delete $scope.transactionMap[key];
-        delete $scope.logMap[key];
-        delete $scope.queryMap[key];
+        delete $scope.transactions[key];
     }
   };
 

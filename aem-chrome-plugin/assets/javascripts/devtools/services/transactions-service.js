@@ -20,11 +20,18 @@ angular.module('aem-chrome-plugin-app')
         // initialize the httpTransaction w the Chrome Request/Response object
         httpTransaction = request;
         httpTransaction.key = requestId;
+        httpTransaction.tracerData = {
+          time: 0,
+          timestamp: 0,
+          requestProgress: [],
+          logs: [],
+          queries: []
+        };
         return httpTransaction;
       } else {
         return null;
       }
     }
   };
-  
+
 }]);

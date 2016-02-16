@@ -406,3 +406,7 @@ table#breakdown td.meter-col {
   background: #eee;
   float:left;
 }
+
+.params-list {
+  margin-left: -10px;
+}

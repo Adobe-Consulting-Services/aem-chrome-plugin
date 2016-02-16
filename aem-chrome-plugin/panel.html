@@ -13,6 +13,7 @@
     <script src="assets/javascripts/devtools/directives/dividers-directive.js"></script>
     <script src="assets/javascripts/devtools/services/transactions-service.js"></script>
     <script src="assets/javascripts/devtools/services/communications-service.js"></script>
+
     <script src="assets/javascripts/devtools/controllers/transactions-controller.js"></script>
     <script src="assets/javascripts/devtools/controllers/options-controller.js"></script>
 
@@ -36,10 +37,9 @@
                        ng-model="controls.searchFilter"/>
               </span>
               <span class="control-max-transactions">
-                <input type="number"
+                {{ transactionKeys.length }} / <input type="number"
                        min="0"
                        ng-model="controls.maxTransactions"/>
-                <label>Max</label>
               </span>
               <span class="control-clear">
                 <input type="button" value="Clear" ng-click="clear()"/>
@@ -106,7 +106,7 @@
                 </li>
                 <!-- Timing -->
                 <li class="tabbed-pane-header-tab">
-                  <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing</a>
+                  <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing ( {{ activeTracerData().time }}ms ) </a>
                 </li>
 
               </ul>
@@ -116,15 +116,19 @@
           <div class="tabbed-pane-content data-grid data-grid-details">
             <!-- Log Tab Panel -->
             <div id="tab-log">
-              <table id="log" ng-show="notEmpty(activeLog())">
-                <thead>
-                  <tr>
-                    <th data-sort="string" class="fluid">Messages</th>
-                  </tr>
-                </thead>
+              <table id="log" ng-show="notEmpty(activeTracerData().logs)">
                 <tbody>
-                  <tr ng-repeat="log in activeLog() track by $index">
-                    <td>{{ ::log }}</td>
+                  <tr ng-repeat="entry in activeTracerData().logs track by $index">
+                    <td>
+                      <p><strong>
+                        {{ ::entry.level }}
+                        {{ ::entry.logger }}
+                      </strong></p>
+                      <p>{{ ::entry.message }}</p>
+                      <ul class="params-list">
+                        <li ng-repeat="param in entry.params">{{ ::param }}</li>
+                      </ul>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -132,15 +136,10 @@
 
             <!-- Request Progress Tab Panel -->
             <div id="tab-request-progress">
-              <table id="request-progress" ng-show="notEmpty(activeLog())">
-                <thead>
-                  <tr>
-                    <th data-sort="string" class="fluid">Messages</th>
-                  </tr>
-                </thead>
+              <table id="request-progress" ng-show="notEmpty(activeTracerData().requestProgressLogs)">
                 <tbody>
-                  <tr ng-repeat="log in activeLog() track by $index">
-                    <td>{{ ::log }}</td>
+                  <tr ng-repeat="entry in activeTracerData().requestProgressLogs track by $index">
+                    <td>{{ ::entry }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -149,8 +148,8 @@
             <!-- Queries Tab Panel -->
             <div id="tab-queries">
               <table id="queries">
-                <tr ng-repeat="query in activeQueries() track by $index">
-                  <td>{{ ::query }}</td>
+                <tr ng-repeat="entry in activeTracerData().queries track by $index">
+                  <td>{{ ::entry }}</td>
                 </tr>
               </table>
             </div>
