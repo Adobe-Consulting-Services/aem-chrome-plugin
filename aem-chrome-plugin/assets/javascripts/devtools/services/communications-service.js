@@ -26,7 +26,6 @@ angular.module('aem-chrome-plugin-app')
               },
               function(data) {
                 if (data) {
-                  console.log(data);
                   scope.processTransaction(httpTransaction, data);
                 }
                 // Better added to a directive

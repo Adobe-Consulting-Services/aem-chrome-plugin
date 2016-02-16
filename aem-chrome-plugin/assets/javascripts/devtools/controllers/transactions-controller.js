@@ -2,9 +2,11 @@ angular.module('aem-chrome-plugin-app')
 /** Transactions Controller **/
 .controller('TransactionsCtrl', [
     '$scope',
+    '$timeout',
     'removeHostFilter',
     'CommunicationsService',
     function( $scope,
+              $timeout,
               removeHostFilter,
               communications) {
 
@@ -44,8 +46,11 @@ angular.module('aem-chrome-plugin-app')
   $scope.activeKey = null;
 
   $scope.clear = function() {
-    $scope.transactionKeys = [];
-    $scope.transactions = {};
+    var key;
+    while ($scope.transactionKeys.length > 0) {
+        key = $scope.transactionKeys.pop();
+        delete $scope.transactions[key];
+    }
   };
 
   $scope.activeRequest = function() {
@@ -90,9 +95,14 @@ angular.module('aem-chrome-plugin-app')
     $scope.transactionKeys.push(transaction.key);
     $scope.transactions[transaction.key] = transaction;
 
+    $scope.removeTransactions($scope.getMaxTransactions());
+
+    $timeout(0);
+    /*
     $scope.$apply(function() {
       $scope.removeTransactions($scope.getMaxTransactions());
     });
+    */
   };
 
   $scope.removeTransactions = function(max) {
