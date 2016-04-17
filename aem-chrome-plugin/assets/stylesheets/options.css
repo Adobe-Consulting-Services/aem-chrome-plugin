@@ -9,14 +9,73 @@ h2 {
   margin-bottom: 20px;
 }
 
-.form-options {
-  max-width: 300px;
+.wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-options, .osgi-status {
   padding: 19px 29px 29px;
   margin: 0 auto 20px;
   background-color: #fff;
   border: 1px solid #e5e5e5;
-  border-radius: 5px;
+  border-radius: 3px;
   box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+
+.osgi-status h2 {
+    display: block;
+    width: 100%;
+    padding: 0;
+    margin: 0 0 20px 0;
+    font-size: 21px;
+    font-weight: normal;
+    line-height: 40px;
+    color: #333;
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+    text-align: left;
+}
+
+.osgi-status h4 {
+  font-weight: normal;
+}
+
+.osgi-status label {
+  display: inline;
+  font-weight: bold;
+}
+
+.osgi-status .error {
+  color: red;
+}
+
+.error-instructions {
+  margin-bottom: 20px;
+  border: solid 1px #AC3632;
+  background-color: #FA786E;
+  color: #323232;
+  padding: 1rem 2rem;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+
+.error-instructions a {
+  color: #323232;
+  font-weight: bold;
+}
+.error-instructions ul {
+  list-style: none;
+  margin-left: 0;
+}
+
+.error-instructions .button {
+  margin-top: .5rem;
+  display: inline-block;
+  padding: .5rem 1rem;
+  border: solid 1px #323232;
+  border-radius: 3px;
 }
 
 .form-options input[type=text] {

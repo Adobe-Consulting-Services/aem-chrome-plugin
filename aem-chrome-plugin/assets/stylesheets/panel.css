@@ -410,3 +410,50 @@ table#breakdown td.meter-col {
 .params-list {
   margin-left: -10px;
 }
+
+.error-overlay {
+  border-top: solid 1px #666;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /*background-color: rgba(255,180,180,0.85);*/
+  background-color: rgba(0,0,0,0.80);
+  color: white;
+  z-index: 1000000000;
+}
+
+.error-overlay .error-message {
+  background-color: #fcfcfc;
+  margin: 3rem auto 0 auto;
+  color: #333;
+  width: 700px;
+  font-size: .8rem;
+  padding: .5rem 2rem 2.5rem 2rem;
+  border-radius: 3px;
+  border: solid 1px #333;
+}
+
+.tab-filter-wrapper {
+  background-color: white;
+  position: fixed;
+  padding: 10px;
+  margin-bottom: 10px;
+  margin-left: -10px;
+  width: 100%;
+  margin-top: -50px;
+  border-bottom: dotted 1px #ccc;
+}
+
+.tab-filter-wrapper input {
+  width: 100%;
+}
+
+.tab-filter-container {
+  padding-top: 40px;
+}
+
+.hide-onload {
+  display: none;
+}

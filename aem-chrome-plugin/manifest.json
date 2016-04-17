@@ -11,6 +11,9 @@
       "assets/javascripts/background/background.js"
     ]
   },
+  "web_accessible_resources" : [
+    "*.jar"
+  ] ,
   "permissions": [
     "storage",
     "webRequest",

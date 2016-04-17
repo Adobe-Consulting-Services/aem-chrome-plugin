@@ -9,10 +9,14 @@
     <script src="vendor/assets/javascripts/angular.min.js"></script>
 
     <script src="assets/javascripts/devtools/app.js"></script>
+
     <script src="assets/javascripts/devtools/filters/remove-host-filter.js"></script>
+
     <script src="assets/javascripts/devtools/directives/dividers-directive.js"></script>
+
     <script src="assets/javascripts/devtools/services/transactions-service.js"></script>
     <script src="assets/javascripts/devtools/services/communications-service.js"></script>
+    <script src="assets/javascripts/devtools/services/tracer-status-service.js"></script>
 
     <script src="assets/javascripts/devtools/controllers/transactions-controller.js"></script>
     <script src="assets/javascripts/devtools/controllers/options-controller.js"></script>
@@ -22,13 +26,29 @@
     <div class="aem-chrome-plugin-transactions-controller split-view"
          ng-controller="TransactionsCtrl"
          ng-init="init();">
+
+      <div  ng-hide="osgi.valid"
+            class="hide-onload error-overlay">
+        <div class="error-message">
+            <h1>Attention!</h1>
+
+            <p>The Apache Sling Log Tracer bundle cannot be found on the configured AEM instance.</p>
+
+            <p>Please review and correct any settings in the AEM Chrome Plug-in Options.</p>
+
+            <ul style="margin-left: .5rem;">
+              <li>Chrome > Window > Extensions > AEM Chrome Plug-in > Options</li>
+            </ul>
+        </div>
+      </div>
+
       <div class="split-view-contents split-view-contents-requests">
 
         <div class="data-grid data-grid-requests">
           <div class="control-bar">
               <span class="control-url-filter">
                 <input class="control-filter" type="text"
-                       placeholder="Filter"
+                       placeholder="URL Filter"
                        ng-model="controls.urlFilter"/>
               </span>
               <span class="control-search-filter">
@@ -82,11 +102,11 @@
         <div id="tabs" class="tabbed-pane">
           <div id="hdivider"></div>
           <div class="transaction-info">
-            <span ng-hide="activeRequest()">
+            <span ng-hide="activeRequest">
               Select a request to see the details
             </span>
-            <span ng-show="activeRequest()">
-              {{ activeRequest().request.method }} {{ activeRequest().request.url | removeHost }}
+            <span ng-show="activeRequest">
+              {{ activeRequest.request.method }} {{ activeRequest.request.url | removeHost }}
             </span>
           </div>
           <div class="tabbed-pane-header">
@@ -94,70 +114,95 @@
               <ul class="tabbed-pane-header-tabs">
                 <!-- Log Tab -->
                 <li class="tabbed-pane-header-tab">
-                  <a href="#tab-log" class="tabbed-pane-header-tab-title">Log</a>
+                  <a href="#tab-log" class="tabbed-pane-header-tab-title">Log
+                    <span ng-show="activeTracerData.logs">({{ activeTracerData.logs.length }})</span></a>
                 </li>
                 <!-- Request Progress -->
                 <li class="tabbed-pane-header-tab">
-                  <a href="#tab-request-progress" class="tabbed-pane-header-tab-title">Request Progress</a>
+                  <a href="#tab-request-progress" class="tabbed-pane-header-tab-title">Request Progress
+                    <span ng-show="activeTracerData.requestProgressLogs">({{ activeTracerData.requestProgressLogs.length }})</span></a>
                 </li>
                 <!-- Queries Tab -->
                 <li class="tabbed-pane-header-tab">
                   <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries
-                    <span ng-show="activeTracerData().queries && activeTracerData().queries.length > 0">( {{ activeTracerData().queries.length }} )</span></a>
+                    <span ng-show="activeTracerData.queries">({{ activeTracerData.queries.length }})</span></a>
                 </li>
                 <!-- Timing -->
                 <li class="tabbed-pane-header-tab">
                   <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing
-                    <span ng-show="activeTracerData().time > 0">( {{ activeTracerData().time || 0 }}ms )</a></span>
+                    <span ng-show="activeTracerData.time > 0">({{ activeTracerData.time || 0 }}ms)</a></span>
                 </li>
-
               </ul>
             </div>
           </div>
 
           <div class="tabbed-pane-content data-grid data-grid-details">
+
             <!-- Log Tab Panel -->
             <div id="tab-log">
-              <table id="log" ng-show="notEmpty(activeTracerData().logs)">
-                <tbody>
-                  <tr ng-repeat="entry in activeTracerData().logs track by $index">
-                    <td>
-                      <p><strong>
-                        {{ ::entry.level }}
-                        {{ ::entry.logger }}
-                      </strong></p>
-                      <p>{{ ::entry.message }}</p>
-                      <ul class="params-list">
-                        <li ng-repeat="param in entry.params">{{ ::param }}</li>
-                      </ul>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="tab-filter-container">
+                <div class="tab-filter-wrapper">
+                  <input class="tab-filter" type="text" placeholder="Filter Logs" ng-model="controls.logFilter"/>
+                </div>
+
+                <table id="log" ng-show="notEmpty(activeTracerData.logs)">
+                  <tbody>
+                    <tr ng-repeat="entry in activeTracerData.logs | filter: controls.logFilter track by $index">
+                      <td>
+                        <p><strong>
+                          {{ ::entry.level }}
+                          {{ ::entry.logger }}
+                        </strong></p>
+                        <p>{{ ::entry.message }}</p>
+                        <ul class="params-list">
+                          <li ng-repeat="param in entry.params">{{ ::param }}</li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <!-- Request Progress Tab Panel -->
             <div id="tab-request-progress">
-              <table id="request-progress" ng-show="notEmpty(activeTracerData().requestProgressLogs)">
-                <tbody>
-                  <tr ng-repeat="entry in activeTracerData().requestProgressLogs track by $index">
-                    <td>{{ ::entry }}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="tab-filter-container">
+                <div class="tab-filter-wrapper">
+                    <input class="tab-filter" type="text" placeholder="Filter Request Progress" ng-model="controls.requestProgressFilter"/>
+                </div>
+
+                <table id="request-progress" ng-show="notEmpty(activeTracerData.requestProgressLogs)">
+                  <tbody>
+                    <tr ng-repeat="entry in activeTracerData.requestProgressLogs | filter: controls.requestProgressFilter track by $index">
+                      <td>{{ entry }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             <!-- Queries Tab Panel -->
             <div id="tab-queries">
-              <table id="queries">
-                <tr ng-repeat="entry in activeTracerData().queries track by $index">
-                  <td>
-                    <p ng-show="entry.caller"><strong>Caller: {{ ::entry.caller }}</strong></p>
-                    <p><strong>Query:</strong> {{ ::entry.query}}</p>
-                    <p><strong>Plan:</strong> {{ ::entry.plan}}</p>
-                  </td>
-                </tr>
-              </table>
+              <div class="tab-filter-container">
+                <div class="tab-filter-wrapper">
+                  <input class="tab-filter" type="text" placeholder="Filter Queries" ng-model="controls.queryFilter"/>
+                </div>
+
+                <table id="queries">
+                  <tr ng-show="activeTracerData.queries.length === 0">
+                    <td>
+                      If no queries are displayed ensure a tracer set exists that covers: org.apache.jackrabbit.oak.query;level=debug
+                    </td>
+                  </tr>
+                  <tr ng-repeat="entry in activeTracerData.queries | filter: controls.queryFilter track by $index">
+                    <td>
+                      <p ng-show="entry.caller"><strong>Caller: {{ ::entry.caller }}</strong></p>
+                      <p><strong>Query:</strong> {{ ::entry.query}}</p>
+                      <p><strong>Plan:</strong> {{ ::entry.plan}}</p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
             </div>
 
             <!-- Timing Tab Panel -->
@@ -166,11 +211,10 @@
                 <tr>
                   <td>
                     <ul class="params-list">
-                      <li>Server time: {{ (activeTracerData().time || 0) | number: 0 }}ms</li>
-                      <li>Network time: {{ activeRequest().time - (activeTracerData().time || 0) | number: 0 }}ms</li>
-                      <li>Total time: {{ activeRequest().time | number: 0 }}ms</li>
+                      <li>Server time: {{ (activeTracerData.time || 0) | number: 0 }}ms</li>
+                      <li>Network time: {{ activeRequest.time - (activeTracerData.time || 0) | number: 0 }}ms</li>
+                      <li>Total time: {{ activeRequest.time | number: 0 }}ms</li>
                     </ul>
-                    <p>Detailed timing to be derived from request progress</p>
                     </td>
                 </tr>
               </table>

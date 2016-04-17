@@ -5,10 +5,12 @@ angular.module('aem-chrome-plugin-app')
     '$timeout',
     'removeHostFilter',
     'CommunicationsService',
+    'TracerStatusService',
     function( $scope,
               $timeout,
               removeHostFilter,
-              communications) {
+              communications,
+              tracerStatus) {
 
   var MAX_TRANSACTIONS = 25;
 
@@ -19,8 +21,12 @@ angular.module('aem-chrome-plugin-app')
     maxTransactions: MAX_TRANSACTIONS
   };
 
+  $scope.activeKey = null;
+  $scope.activeRequest = {};
+  $scope.activeTracerData  = {};
   $scope.transactionKeys = [];
   $scope.transactions = {};
+  $scope.osgi = {};
 
   $scope.$watch('controls.urlFilter', function(value) {
     if (chrome && chrome.runtime) {
@@ -31,6 +37,7 @@ angular.module('aem-chrome-plugin-app')
   $scope.init = function() {
     if (chrome && chrome.runtime) {
       chrome.runtime.sendMessage({ action: 'updateURLFilter', urlFilter: $scope.controls.urlFilter }, function(response) {});
+      chrome.runtime.sendMessage({ action: 'getTracerConfig' }, function(data) { $scope.osgi = tracerStatus.setStatus(data); $timeout(0); });
     }
 
     // Start listening for Requests
@@ -43,7 +50,6 @@ angular.module('aem-chrome-plugin-app')
     });
   };
 
-  $scope.activeKey = null;
 
   $scope.clear = function() {
     var key;
@@ -53,10 +59,12 @@ angular.module('aem-chrome-plugin-app')
     }
   };
 
+/*
   $scope.activeRequest = function() {
     return $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
   };
-
+*/
+/*
   $scope.activeTracerData = function() {
     var transaction = $scope.activeRequest();
     if (transaction) {
@@ -65,9 +73,11 @@ angular.module('aem-chrome-plugin-app')
       return null;
     }
   };
-
+*/
   $scope.setActive = function(transactionId) {
     $scope.activeKey = transactionId;
+    $scope.activeRequest = $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
+    $scope.activeTracerData = $scope.activeRequest.tracerData || null;
   };
 
   $scope.notEmpty = function(col) {
@@ -98,11 +108,6 @@ angular.module('aem-chrome-plugin-app')
     $scope.removeTransactions($scope.getMaxTransactions());
 
     $timeout(0);
-    /*
-    $scope.$apply(function() {
-      $scope.removeTransactions($scope.getMaxTransactions());
-    });
-    */
   };
 
   $scope.removeTransactions = function(max) {

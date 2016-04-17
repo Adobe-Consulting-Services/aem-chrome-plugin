@@ -3,7 +3,6 @@ angular.module('aem-chrome-plugin-app')
 .directive('aemChromePluginPanels', function() {
   return function(scope, element, attrs) {
 
-
     var initDividers = function() {
       $('#tabs').tabs();
       $('.stupidtable').stupidtable();

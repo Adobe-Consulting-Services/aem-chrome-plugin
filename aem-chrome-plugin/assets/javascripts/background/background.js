@@ -59,11 +59,10 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
           password: 'admin',
           tracerIds: 'oak-query,oak-writes',
           host: 'http://localhost:4502',
-          maxHistory: 100
+          maxHistory: 200
       })
   );
 }
-
 
 chrome.runtime.onConnect.addListener(function(port) {
     console.assert(port.name == "aem-chrome-plugin");
@@ -96,34 +95,96 @@ chrome.runtime.onMessage.addListener(
     } else if (message.action === 'updateURLFilter') {
       // sync the urlFilter from AEMPanel to background.js
       urlFilter = (message.urlFilter || '').trim();
+    } else if (message.action === 'getTracerConfig') {
+      getTracerConfig(callback);
+      return true;
     }
 });
+
+function getOptions() {
+  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
+  return {
+    host: options.host,
+    user: options.user,
+    password: options.password,
+    url: function(url) {
+        return options.host + url;
+    }
+  };
+};
+
+function getWithAuth(url, callback) {
+  var options = getOptions();
+
+  $.ajax({
+    url: options.url(url),
+    method: 'GET',
+    beforeSend: function(xhr) {
+      xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+    },
+    success: function(data) {
+      if (callback) {
+        callback(data);
+      }
+    }
+  });
+};
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
-function getSlingTracerJSON(request, sender, sendResponse) {
-  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
-      callback = sendResponse,
-      // Servlet context can be supported by adding to the options.host configuration
-      url = options.host + '/system/console/tracer/' + request.requestId + '.json',
-      username = options.user,
-      password = options.password;
+function getTracerConfig(callback) {
+  var BUNDLE_URL = '/system/console/bundles/org.apache.sling.tracer.json',
+      CONFIG_URL = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer.json',
+      options = getOptions(),
+      status = { };
 
-  console.log('Requesting Sling Tracer information @ ' + url);
+  console.log('Requesting Sling Tracer Bundle information @ ' + BUNDLE_URL);
 
-  $.ajax({
-    url: url,
-    method: 'GET',
-    beforeSend: function(xhr) {
-      xhr.setRequestHeader("Authorization", "Basic " + btoa(username + ":" + password));
-    },
-    success: function(d) {
-      callback(d);
+  getWithAuth(BUNDLE_URL, function(d) {
+    if (d && d.data && d.data[0]) {
+      status.bundleActive = 'Active' === d.data[0].state;
+      status.bundleVersion = d.data[0].version || '0.0.0';
+
+      if (status.bundleActive) {
+        console.log('Requesting Sling Tracer Config information @ ' + CONFIG_URL);
+
+        getWithAuth(CONFIG_URL, function(d2) {
+          var properties;
+
+          if (d2 && d2[0] && d2[0].properties) {
+            properties = d2[0].properties;
+            status.configEnabled = properties.enabled.value || false;
+            status.configServletEnabled = properties.servletEnabled.value || false;
+            status.configTracerSets = properties.tracerSets.values || [];
+          }
+          console.log("calling back w");
+          console.log(status);
+          console.log(callback);
+          callback(status);
+        });
+      } else {
+        callback(status);
+      }
+    } else {
+      callback(status);
     }
   });
 }
 
+
+
+/**
+ * Make XHR request to Sling Tracer endpoint to collect JSON data.
+ **/
+function getSlingTracerJSON(request, sender, callback) {
+  var options = getOptions(),
+      url = '/system/console/tracer/' + request.requestId + '.json';
+      // Servlet context can be supported by adding to the options.host configuration
+
+  console.log('Requesting Sling Tracer information @ ' + url);
+  getWithAuth(url, callback);
+}
 
 var injectHeaderListener = function (details) {
   var options;
