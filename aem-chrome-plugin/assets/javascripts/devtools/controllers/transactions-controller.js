@@ -59,21 +59,6 @@ angular.module('aem-chrome-plugin-app')
     }
   };
 
-/*
-  $scope.activeRequest = function() {
-    return $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
-  };
-*/
-/*
-  $scope.activeTracerData = function() {
-    var transaction = $scope.activeRequest();
-    if (transaction) {
-        return transaction.tracerData;
-    } else {
-      return null;
-    }
-  };
-*/
   $scope.setActive = function(transactionId) {
     $scope.activeKey = transactionId;
     $scope.activeRequest = $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
@@ -124,5 +109,4 @@ angular.module('aem-chrome-plugin-app')
       ignoreCache: true,
     });
   };
-
 }]);

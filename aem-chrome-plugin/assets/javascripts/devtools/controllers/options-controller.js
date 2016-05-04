@@ -13,7 +13,7 @@ angular.module('aem-chrome-plugin-app')
 
   $scope.$watch('options', function(value) {
     localStorage.setItem('aem-chrome-plugin.options', JSON.stringify(value));
-    $timeout(function() { init(); }, 100);
+    $timeout(function() { init(); }, 250);
 	}, true);
 
   function init() {
@@ -22,11 +22,11 @@ angular.module('aem-chrome-plugin-app')
           action: 'getTracerConfig'
         },
         function(data) {
-          $scope.osgi = tracerStatus.setStatus(data);
-          $timeout(0);
+          $timeout(function() {
+            $scope.osgi = tracerStatus.setStatus(data);
+            $scope.initialized = true;
+          }, 250);
         });
     }
-  };
-
-  init();
+  }
 }]);

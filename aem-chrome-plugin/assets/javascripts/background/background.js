@@ -111,7 +111,7 @@ function getOptions() {
         return options.host + url;
     }
   };
-};
+}
 
 function getWithAuth(url, callback) {
   var options = getOptions();
@@ -120,15 +120,14 @@ function getWithAuth(url, callback) {
     url: options.url(url),
     method: 'GET',
     beforeSend: function(xhr) {
-      xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
-    },
-    success: function(data) {
+        xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+      }
+    }).always(function(data) {
       if (callback) {
         callback(data);
       }
-    }
-  });
-};
+    });
+  }
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
@@ -158,9 +157,7 @@ function getTracerConfig(callback) {
             status.configServletEnabled = properties.servletEnabled.value || false;
             status.configTracerSets = properties.tracerSets.values || [];
           }
-          console.log("calling back w");
-          console.log(status);
-          console.log(callback);
+
           callback(status);
         });
       } else {

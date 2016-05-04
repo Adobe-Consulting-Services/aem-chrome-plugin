@@ -27,17 +27,17 @@
          ng-controller="TransactionsCtrl"
          ng-init="init();">
 
-      <div  ng-hide="osgi.valid"
+      <div  ng-show="!osgi.valid"
             class="hide-onload error-overlay">
         <div class="error-message">
             <h1>Attention!</h1>
 
-            <p>The Apache Sling Log Tracer bundle cannot be found on the configured AEM instance.</p>
+            <p>A valid Apache Sling Log Tracer cannot be found on the AEM instance.</p>
 
-            <p>Please review and correct any settings in the AEM Chrome Plug-in Options.</p>
+            <p>Please review and correct any settings in the AEM Chrome Plug-in options.</p>
 
             <ul style="margin-left: .5rem;">
-              <li>Chrome > Window > Extensions > AEM Chrome Plug-in > Options</li>
+              <li><strong>Chrome > Window > Extensions > AEM Chrome Plug-in > Options</strong></li>
             </ul>
         </div>
       </div>
@@ -127,11 +127,12 @@
                   <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries
                     <span ng-show="activeTracerData.queries">({{ activeTracerData.queries.length }})</span></a>
                 </li>
-                <!-- Timing -->
+                <!-- Timing
                 <li class="tabbed-pane-header-tab">
                   <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing
                     <span ng-show="activeTracerData.time > 0">({{ activeTracerData.time || 0 }}ms)</a></span>
                 </li>
+                -->
               </ul>
             </div>
           </div>
@@ -205,7 +206,7 @@
               </div>
             </div>
 
-            <!-- Timing Tab Panel -->
+            <!-- Timing Tab Panel
             <div id="tab-timing">
               <table id="timing">
                 <tr>
@@ -219,7 +220,7 @@
                 </tr>
               </table>
             </div>
-
+            -->
           </div>
         </div>
       </div>

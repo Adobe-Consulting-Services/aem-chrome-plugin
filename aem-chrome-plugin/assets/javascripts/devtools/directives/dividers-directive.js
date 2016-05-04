@@ -106,5 +106,7 @@ angular.module('aem-chrome-plugin-app')
     };
 
     initDividers();
+    // Hack to remove the overlay flicker
+    $('.hide-onload').removeClass('hide-onload');
   };
 });

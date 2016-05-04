@@ -39,20 +39,18 @@ angular.module('aem-chrome-plugin-app')
   function isValidVersion() {
     var version = '0.0.0',
         dashIndex = -1,
-        versions;
+        versions = [];
 
     version = status.bundle.version.value || version;
     dashIndex = version.indexOf('-');
 
-    if(dashIndex > 0) {
+    if (dashIndex > 0) {
       version = version.substring(0, dashIndex);
     }
 
     versions = version.split('.');
 
-    if(versions.length > 0 && versions[0] > 0) { return true; }
-    if(versions.length > 1 && versions[1] > 0) { return true; }
-    if(versions.length > 2 && versions[2] >= 3) { return true; }
+    if (versions.length > 0 && versions[0] >= 1) { return true; }
 
     return false;
   }
@@ -65,7 +63,7 @@ angular.module('aem-chrome-plugin-app')
     setStatus: function(newStatus) {
       newStatus = newStatus || {};
 
-      status.bundle.exists.value = newStatus.bundleVersion;
+      status.bundle.exists.value = newStatus.bundleVersion ? true : false;
       status.bundle.exists.valid = status.bundle.exists.value;
 
       status.bundle.active.value = newStatus.bundleActive;
@@ -84,12 +82,13 @@ angular.module('aem-chrome-plugin-app')
       status.config.tracerSets.valid = status.config.tracerSets.value;
 
       // Compute overall status
-      status.valid = status.bundle.exists.value
-          && status.bundle.active.valid
-          && status.bundle.version.valid
-          && status.config.enabled.valid
-          && status.config.servletEnabled.valid
-          && status.config.tracerSets.valid;
+      status.valid =
+          status.bundle.exists.value &&
+          status.bundle.active.valid &&
+          status.bundle.version.valid &&
+          status.config.enabled.valid &&
+          status.config.servletEnabled.valid &&
+          status.config.tracerSets.valid;
 
       return status;
     }

@@ -19,16 +19,16 @@
         <div ng-show="!osgi.valid"
             class="error-instructions">
             <!-- Bundle is not installed -->
-            <div ng-show="!osgi.valid && (!osgi.bundle.exists.valid || !osgi.bundle.version.valid)">
-              <p>AEM Chrome Plug-in requires at a minimum Sling Apache Log Tracer version 0.0.3.</p>
+            <div ng-show="!osgi.bundle.exists.valid || !osgi.bundle.version.valid">
+              <p>AEM Chrome Plug-in requires AEM 6.1+ and Sling Apache Log Tracer version 1.0.0+</p>
               <p>Please download the latest Apache Sling Log Tracer Bundle and install on the target AEM instance and refresh this page.</p>
               <ul>
-                <li><a class="button" target="sling-download" href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22org.apache.sling.tracer%22">Download the Apache Sling Log Tracer 0.0.3+ Bundle</a></li>
+                <li><a class="button" target="sling-download" href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22org.apache.sling.tracer%22">Download the Apache Sling Log Tracer 1.0.0+ Bundle</a></li>
                 <li><a class="button" target="felix-bundles" href="{{ options.host }}/system/console/bundles">Install the Apache Sling Log Tracer Bundle</a></li>
               </ul>
             </div>
 
-            <div ng-show="!osgi.valid && osgi.bundle.exists.valid && osgi.bundle.version.valid">
+            <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid">
                 <p>The installed Apache Sling Log Tracer bundle is misconfigured.</p>
                 <p>Please review and correct the configuration.</p>
                 <a class="button" href="#osgi-status">Review the Current Configuration</a>
