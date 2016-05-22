@@ -53,10 +53,37 @@
             <input type="text" ng-model="options.password"/>
           </label>
           <label class="text">
-            Sling Tracer Ids <em>(comma delimited)</em>
+            Server Sling Tracer Ids <em>(comma delimited)</em>
             <br/>
             <input type="text" ng-model="options.tracerIds"/>
           </label>
+          <label class="text">
+            Ad-hoc Tracer Sets
+            <br/>
+          </label>
+
+          <div class="tracer-set"
+              ng-repeat="set in options.tracerSets">
+              <span class="tracer-set--enabled--wrapper">
+              <input class="tracer-set--enabled"
+                    type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+              </span>
+              <input class="tracer-set--package" type="text" ng-model="set.package" placeholder="Package"/>
+              <select class="tracer-set--level" ng-model="set.level">
+                  <option value="TRACE">TRACE</option>
+                  <option value="DEBUG">DEBUG</option>
+                  <option value="INFO">INFO</option>
+                  <option value="WARN">WARN</option>
+                  <option value="ERROR">ERROR</option>
+              </select>
+              <button
+                class="tracer-set--remove"
+                ng-show="options.tracerSets.length > 1"
+                ng-click="options.tracerSets.splice($index, 1)">Remove</button>
+          </div>
+          <button
+              class="tracer-set--add"
+              ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">Add TracerSet</button>
         </form>
 
         <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid"
@@ -110,7 +137,7 @@
         </div>
       </div>
       <div class="footer">
-        AEM Chrome Plug-in is heavily inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.
+        AEM Chrome Plug-in is inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.
       </div>
     </div>
   </body>

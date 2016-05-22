@@ -58,6 +58,7 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
           user: 'admin',
           password: 'admin',
           tracerIds: 'oak-query,oak-writes',
+          tracerSets: [],
           host: 'http://localhost:4502',
           maxHistory: 200
       })
@@ -205,6 +206,20 @@ var injectHeaderListener = function (details) {
       name: 'Sling-Tracers',
       value: options.tracerIds
     });
+
+    var tracerSets = [];
+    $.each(options.tracerSets, function(index, value) {
+      if (value.enabled && value.package) {
+        tracerSets.push(value.package + ';level=' + value.level || 'DEBUG');
+      }
+    });
+
+    if (tracerSets) {
+      details.requestHeaders.push({
+        name: 'Sling-Tracer-Config',
+        value: tracerSets.join(',')
+      });
+    }
   }
 
   return { requestHeaders: details.requestHeaders };

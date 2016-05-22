@@ -1,6 +1,6 @@
 angular.module('aem-chrome-plugin-app')
-/** Transactions Controller **/
-.controller('TransactionsCtrl', [
+/** requests Controller **/
+.controller('RequestsCtrl', [
     '$scope',
     '$timeout',
     'removeHostFilter',
@@ -12,20 +12,20 @@ angular.module('aem-chrome-plugin-app')
               communications,
               tracerStatus) {
 
-  var MAX_TRANSACTIONS = 25;
+  var MAX_REQUESTS = 25;
 
   // Data
   $scope.controls = {
     urlFilter: '.html',
     searchFilter: '',
-    maxTransactions: MAX_TRANSACTIONS
+    maxRequests: MAX_REQUESTS
   };
 
   $scope.activeKey = null;
   $scope.activeRequest = {};
   $scope.activeTracerData  = {};
-  $scope.transactionKeys = [];
-  $scope.transactions = {};
+  $scope.requestKeys = [];
+  $scope.requests = {};
   $scope.osgi = {};
 
   $scope.$watch('controls.urlFilter', function(value) {
@@ -44,24 +44,24 @@ angular.module('aem-chrome-plugin-app')
     communications.listen($scope);
   };
 
-  $scope.transactions = function() {
-    return $scope.transactionKeys.map(function(key) {
-      return $scope.transactions[key];
+  $scope.requests = function() {
+    return $scope.requestKeys.map(function(key) {
+      return $scope.requests[key];
     });
   };
 
 
   $scope.clear = function() {
     var key;
-    while ($scope.transactionKeys.length > 0) {
-        key = $scope.transactionKeys.pop();
-        delete $scope.transactions[key];
+    while ($scope.requestKeys.length > 0) {
+        key = $scope.requestKeys.pop();
+        delete $scope.requests[key];
     }
   };
 
-  $scope.setActive = function(transactionId) {
-    $scope.activeKey = transactionId;
-    $scope.activeRequest = $scope.activeKey ? $scope.transactions[$scope.activeKey] : null;
+  $scope.setActive = function(requestId) {
+    $scope.activeKey = requestId;
+    $scope.activeRequest = $scope.activeKey ? $scope.requests[$scope.activeKey] : null;
     $scope.activeTracerData = $scope.activeRequest.tracerData || null;
   };
 
@@ -73,34 +73,34 @@ angular.module('aem-chrome-plugin-app')
     }
   };
 
-  $scope.getMaxTransactions = function() {
-      if (!$scope.controls.maxTransactions || $scope.controls.maxTransactions < 0) {
-        return MAX_TRANSACTIONS;
+  $scope.getMaxRequests = function() {
+      if (!$scope.controls.maxRequests || $scope.controls.maxRequests < 0) {
+        return MAX_REQUESTS;
       } else {
-        return $scope.controls.maxTransactions;
+        return $scope.controls.maxRequests;
       }
   };
 
-  $scope.getClass = function(transactionId) {
-    return (transactionId === $scope.activeKey) ? 'selected' : '';
+  $scope.getClass = function(requestId) {
+    return (requestId === $scope.activeKey) ? 'selected' : '';
   };
 
-  $scope.processTransaction = function(transaction, data) {
-    transaction.tracerData = data;
-    $scope.transactionKeys.push(transaction.key);
-    $scope.transactions[transaction.key] = transaction;
+  $scope.processRequest = function(request, data) {
+    request.tracerData = data;
+    $scope.requestKeys.push(request.key);
+    $scope.requests[request.key] = request;
 
-    $scope.removeTransactions($scope.getMaxTransactions());
+    $scope.removeRequests($scope.getMaxRequests());
 
     $timeout(0);
   };
 
-  $scope.removeTransactions = function(max) {
+  $scope.removeRequests = function(max) {
     var key;
-    while ($scope.transactionKeys.length > max) {
+    while ($scope.requestKeys.length > max) {
         // Remove from front of array
-        key = $scope.transactionKeys.shift();
-        delete $scope.transactions[key];
+        key = $scope.requestKeys.shift();
+        delete $scope.requests[key];
     }
   };
 

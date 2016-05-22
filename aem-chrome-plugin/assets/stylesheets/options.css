@@ -90,3 +90,36 @@ h2 {
   margin-bottom: 40px;
   font-weight: 300;
 }
+
+
+.tracer-set {
+  margin-bottom: .5rem;
+}
+
+.tracer-set--enabled {
+  margin-bottom: 15px !important;
+}
+
+.tracer-set--enabled--wrapper {
+  zoom:1.5;
+  transform:scale(1.5);
+  -webkit-transform:scale(1.5);
+  transform-origin:0 0;
+  -webkit-transform-origin:0 0;
+  -webkit-transform-origin:0 0;
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.tracer-set--package {
+  width: 300px !important;
+  margin-right: 1rem;
+}
+
+.tracer-set--level {
+  margin-right: 1rem;
+}
+
+.tracer-set--remove {
+  margin-bottom: 10px;
+}

@@ -2,7 +2,7 @@ angular.module('aem-chrome-plugin-app')
 /**
  * Angular Service responsible for brokering communication between the Chrome devtools and background script.
  **/
-.factory('CommunicationsService', [ 'TransactionsService', function(transactions) {
+.factory('CommunicationsService', [ 'RequestsService', function(requests) {
 
   /**
    * Port used to communicate with background logic in background.js
@@ -15,18 +15,18 @@ angular.module('aem-chrome-plugin-app')
   var bindListener = function(scope) {
 
       chrome.devtools.network.onRequestFinished.addListener(function(chromeRequest) {
-        var httpTransaction = transactions.create(chromeRequest);
-        if (httpTransaction && httpTransaction.key) {
+        var request = requests.create(chromeRequest);
+        if (request && request.key) {
 
           if (chrome && chrome.runtime) {
             console.log("Requesting Sling Tracer JSON for: " + chromeRequest.request.url);
             chrome.runtime.sendMessage({
                 action: 'getSlingTracerJSON',
-                requestId: httpTransaction.key
+                requestId: request.key
               },
               function(data) {
                 if (data) {
-                  scope.processTransaction(httpTransaction, data);
+                  scope.processRequest(request, data);
                 }
                 // Better added to a directive
                 $('.data-container').scrollTop(100000000);

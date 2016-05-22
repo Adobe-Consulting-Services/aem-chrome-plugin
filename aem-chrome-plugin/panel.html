@@ -14,17 +14,17 @@
 
     <script src="assets/javascripts/devtools/directives/dividers-directive.js"></script>
 
-    <script src="assets/javascripts/devtools/services/transactions-service.js"></script>
+    <script src="assets/javascripts/devtools/services/requests-service.js"></script>
     <script src="assets/javascripts/devtools/services/communications-service.js"></script>
     <script src="assets/javascripts/devtools/services/tracer-status-service.js"></script>
 
-    <script src="assets/javascripts/devtools/controllers/transactions-controller.js"></script>
+    <script src="assets/javascripts/devtools/controllers/requests-controller.js"></script>
     <script src="assets/javascripts/devtools/controllers/options-controller.js"></script>
 
   </head>
   <body class="aem-chrome-plugin" test aem-chrome-plugin-panels>
-    <div class="aem-chrome-plugin-transactions-controller split-view"
-         ng-controller="TransactionsCtrl"
+    <div class="aem-chrome-plugin-requests-controller split-view"
+         ng-controller="RequestsCtrl"
          ng-init="init();">
 
       <div  ng-show="!osgi.valid"
@@ -56,10 +56,10 @@
                        placeholder="Search"
                        ng-model="controls.searchFilter"/>
               </span>
-              <span class="control-max-transactions">
-                {{ transactionKeys.length }} / <input type="number"
+              <span class="control-max-requests">
+                {{ requestKeys.length }} / <input type="number"
                        min="0"
-                       ng-model="controls.maxTransactions"/>
+                       ng-model="controls.maxRequests"/>
               </span>
               <span class="control-clear">
                 <input type="button" value="Clear" ng-click="clear()"/>
@@ -71,21 +71,21 @@
           <table class="header">
             <tr>
               <th class="status">Status</th>
-              <th class="url">URL</th>
+              <th class="url">URL {{ requests().length }}</th>
               <th class="method">Method</th>
               <th class="duration">Resp. Time</th>
             </tr>
           </table>
           <div class="data-container">
             <table id="requests">
-              <tr ng-repeat="transaction in transactions() | filter: {request: {url: controls.searchFilter}} track by $index "
-                  ng-click="setActive(transaction.key)"
-                  ng-class="getClass(transaction.key)">
+              <tr ng-repeat="request in requests() | filter: {request: {url: controls.searchFilter}} track by $index "
+                  ng-click="setActive(request.key)"
+                  ng-class="getClass(request.key)">
 
-                <td class="status">{{ transaction.response.status }}</td>
-                <td class="url ellipsis">{{ transaction.request.url | removeHost }}</td>
-                <td class="method">{{ transaction.request.method }}</td>
-                <td class="duration">{{ transaction.time | number: 0 }}ms</td>
+                <td class="status">{{ request.response.status }}</td>
+                <td class="url ellipsis">{{ request.request.url | removeHost }}</td>
+                <td class="method">{{ request.request.method }}</td>
+                <td class="duration">{{ request.time | number: 0 }}ms</td>
               </tr>
               <tr class="filler">
                 <td class="status"></td>
@@ -101,7 +101,7 @@
         <div id="vdivider"></div>
         <div id="tabs" class="tabbed-pane">
           <div id="hdivider"></div>
-          <div class="transaction-info">
+          <div class="request-info">
             <span ng-hide="activeRequest">
               Select a request to see the details
             </span>
