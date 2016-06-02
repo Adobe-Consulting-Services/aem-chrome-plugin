@@ -104,12 +104,77 @@
         <div id="tabs" class="tabbed-pane">
           <div id="hdivider"></div>
           <div class="request-info">
+            <button
+              class="mini-options--button"
+              ng-click="showMiniOptions = !showMiniOptions">...</button>
+
             <span ng-hide="activeRequest">
               Select a request to see the details
             </span>
             <span ng-show="activeRequest">
               {{ activeRequest.request.method }} {{ activeRequest.request.url | removeHost }}
             </span>
+
+<!-- Mini Options -->
+<div id="mini-options" ng-show="showMiniOptions">
+
+  <button class="mini-options--close"
+        ng-click="showMiniOptions = !showMiniOptions">X</button>
+
+  <div ng-controller="OptionsCtrl">
+  <div class="field-wrapper">
+    <label class="text">AEM Host</label>
+    <input type="text" ng-model="options.host"/>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="text">Web Console User</label>
+    <input type="text" ng-model="options.user"/>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="text">Web Console Password</label>
+    <input type="text" ng-model="options.password"/>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="text">Server Sling Tracer Ids</label>
+    <input type="text" ng-model="options.tracerIds"/>
+  </div>
+
+  <div class="field-wrapper">
+    <label class="text">Ad-hoc Tracer Sets</label>
+
+    <div class="tracer-set"
+      ng-repeat="set in options.tracerSets">
+      <span class="tracer-set--enabled--wrapper">
+      <input class="tracer-set--enabled"
+           type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+      </span>
+      <input class="tracer-set--package" type="text" ng-model="set.package" placeholder="Package"/>
+      <select class="tracer-set--level" ng-model="set.level">
+         <option value="TRACE">TRACE</option>
+         <option value="DEBUG">DEBUG</option>
+         <option value="INFO">INFO</option>
+         <option value="WARN">WARN</option>
+         <option value="ERROR">ERROR</option>
+      </select>
+      <button
+       class="tracer-set--remove"
+       ng-show="options.tracerSets.length > 1"
+       ng-click="options.tracerSets.splice($index, 1)">Remove</button>
+      </div>
+
+      <button
+       class="tracer-set--add"
+       ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">Add TracerSet</button>
+
+    </div>
+  </div>
+</div>
+
+<!-- End Options -->
+
           </div>
           <div class="tabbed-pane-header">
             <div class="tabbed-pane-header-contents">

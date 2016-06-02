@@ -3,17 +3,13 @@ angular.module('aem-chrome-plugin-app')
 .controller('RequestsCtrl', [
     '$scope',
     '$filter',
-    '$timeout',/*
-    'logBlacklistFilter',
-    'queryBlacklistFilter',*/
+    '$timeout',
     'removeHostFilter',
     'CommunicationsService',
     'TracerStatusService',
     function( $scope,
               $filter,
               $timeout,
-              /*logBlacklistFilter,
-              queryBlacklistFilter,*/
               removeHostFilter,
               communications,
               tracerStatus) {
@@ -33,6 +29,7 @@ angular.module('aem-chrome-plugin-app')
   $scope.requestKeys = [];
   $scope.requests = {};
   $scope.osgi = {};
+  $scope.showMiniOptions = false;
 
   $scope.$watch('controls.urlFilter', function(value) {
     if (chrome && chrome.runtime) {

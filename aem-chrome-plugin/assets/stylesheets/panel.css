@@ -457,3 +457,46 @@ table#breakdown td.meter-col {
 .hide-onload {
   display: none;
 }
+
+.mini-options--button {
+  float: right;
+}
+
+#mini-options {
+  position: absolute;
+  padding: 1em;
+  background-color: #f7f7f7;
+  color: black;
+  z-index: 10000;
+  right: 1rem;
+  top: 1rem;
+  border: solid 1px #ccc;
+  width: 500px;
+}
+
+#mini-options .mini-options--close {
+  float: right;
+}
+
+#mini-options .field-wrapper {
+  margin: .5rem 0;
+}
+
+#mini-options .field-wrapper label {
+  display: inline-block;
+  width: 150px;
+}
+
+#mini-options .field-wrapper input[type=text] {
+  width: 280px;
+  padding: 2px;
+}
+
+#mini-options .field-wrapper .tracer-set input[type=text] {
+  width: 300px;
+  padding: 2px;
+}
+
+#mini-options .tracer-set--add {
+  margin-top: .5rem;
+}
