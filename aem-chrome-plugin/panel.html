@@ -11,6 +11,8 @@
     <script src="assets/javascripts/devtools/app.js"></script>
 
     <script src="assets/javascripts/devtools/filters/remove-host-filter.js"></script>
+    <script src="assets/javascripts/devtools/filters/log-blacklist-filter.js"></script>
+    <script src="assets/javascripts/devtools/filters/query-blacklist-filter.js"></script>
 
     <script src="assets/javascripts/devtools/directives/dividers-directive.js"></script>
 
@@ -71,7 +73,7 @@
           <table class="header">
             <tr>
               <th class="status">Status</th>
-              <th class="url">URL {{ requests().length }}</th>
+              <th class="url">URL</th>
               <th class="method">Method</th>
               <th class="duration">Resp. Time</th>
             </tr>

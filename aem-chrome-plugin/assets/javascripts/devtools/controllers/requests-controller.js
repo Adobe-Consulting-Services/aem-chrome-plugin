@@ -2,12 +2,18 @@ angular.module('aem-chrome-plugin-app')
 /** requests Controller **/
 .controller('RequestsCtrl', [
     '$scope',
-    '$timeout',
+    '$filter',
+    '$timeout',/*
+    'logBlacklistFilter',
+    'queryBlacklistFilter',*/
     'removeHostFilter',
     'CommunicationsService',
     'TracerStatusService',
     function( $scope,
+              $filter,
               $timeout,
+              /*logBlacklistFilter,
+              queryBlacklistFilter,*/
               removeHostFilter,
               communications,
               tracerStatus) {
@@ -50,7 +56,6 @@ angular.module('aem-chrome-plugin-app')
     });
   };
 
-
   $scope.clear = function() {
     var key;
     while ($scope.requestKeys.length > 0) {
@@ -87,6 +92,12 @@ angular.module('aem-chrome-plugin-app')
 
   $scope.processRequest = function(request, data) {
     request.tracerData = data;
+
+    debugger
+    request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
+    debugger
+    request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
+
     $scope.requestKeys.push(request.key);
     $scope.requests[request.key] = request;
 
