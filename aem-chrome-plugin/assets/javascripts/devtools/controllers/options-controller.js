@@ -37,9 +37,12 @@ angular.module('aem-chrome-plugin-app')
       maxHistory: 200
   };
 
+  $scope.options.tracerSets = $scope.options.tracerSets || [];
+
   $scope.osgi = {};
 
   $scope.$watch('options', function(value) {
+    value.tracerSets = value.tracerSets || [];
     localStorage.setItem('aem-chrome-plugin.options', JSON.stringify(value));
     $timeout(function() { init(); }, 250);
 	}, true);
