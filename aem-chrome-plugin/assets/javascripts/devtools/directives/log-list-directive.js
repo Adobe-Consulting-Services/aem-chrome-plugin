@@ -28,36 +28,6 @@ angular.module('aem-chrome-plugin-app')
       },
       link: function link(scope, element, attrs) {
         var cache = [];
-        /*
-        scope.$watchGroup(['entries', 'filter'], function(newValues, oldValues, scope) {
-          var html = '',
-              entries = newValues[0],
-              filter = newValues[1];
-
-          if (entries && entries.length > 0) {
-            angular.forEach(entries, function(entry) {
-              var filter = scope.filter || '',
-                  entryHTML = null;
-
-              if (entry) {
-                // Either no filter specified so include all
-                // Or the filter is specified and matches
-                entryHTML = buildEntry(attrs.format, entry, filter);
-
-                if (entryHTML) {
-                  html += entryHTML;
-                }
-              }
-            });
-          }
-
-          if (html) {
-            html = '<ul>' + html + '</ul>';
-          }
-
-          element.html(html);
-        }); // End groupWatch
-        */
 
         scope.$watchGroup(['entries'], function(newValues, oldValues, scope) {
           var html = '',
@@ -82,7 +52,7 @@ angular.module('aem-chrome-plugin-app')
                       html += builtEntry.html;
                     }
                   } else {
-                    html += builtEntry.html;                    
+                    html += builtEntry.html;
                   }
                 }
               }
@@ -133,16 +103,6 @@ angular.module('aem-chrome-plugin-app')
           } else {
             result = genericTemplate(entry);
           }
-
-          /*
-          if (needle && needle.length > 0) {
-            if (result.haystack.toLowerCase().indexOf(needle.toLowerCase()) > -1) {
-              return result.html;
-            }
-          } else {
-            return result.html;
-          }
-          */
 
           return result;
         }
