@@ -110,9 +110,7 @@ angular.module('aem-chrome-plugin-app')
   $scope.processRequest = function(request, data) {
     request.tracerData = data;
 
-    debugger
     request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
-    debugger
     request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
 
     $scope.requestKeys.push(request.key);
