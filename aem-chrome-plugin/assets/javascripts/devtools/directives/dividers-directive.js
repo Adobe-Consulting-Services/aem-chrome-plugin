@@ -24,6 +24,7 @@ angular.module('aem-chrome-plugin-app')
   return function(scope, element, attrs) {
 
     var initDividers = function() {
+      $("#aemPluginTab").tabs();
       $('#tabs').tabs();
       $('.stupidtable').stupidtable();
       // key('⌘+k, ctrl+l', function(){ panel.clearData(scope) });

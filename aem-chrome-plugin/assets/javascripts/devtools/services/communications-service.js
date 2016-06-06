@@ -58,6 +58,13 @@ angular.module('aem-chrome-plugin-app')
 
       //Send message to enable tracer headers for *this* tab
       port.postMessage({"action" : "register", "tabId" : chrome.devtools.inspectedWindow.tabId});
+
+      // Listen to the message from background page
+      port.onMessage.addListener(function (msg) {
+          if(msg.url === afPlugin.url) {
+              $(document).trigger("editorLoaded.afPlugin");
+          }
+      });
   };
 
   return {

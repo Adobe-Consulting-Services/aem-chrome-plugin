@@ -85,8 +85,11 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
   );
 }
 
+// an array of all the connections
+var ports =[];
 chrome.runtime.onConnect.addListener(function(port) {
     console.assert(port.name == "aem-chrome-plugin");
+    ports.push(port);
     var tabId;
     port.onMessage.addListener(function(msg) {
         var action = msg.action;
@@ -99,9 +102,21 @@ chrome.runtime.onConnect.addListener(function(port) {
     port.onDisconnect.addListener(function(msg){
         if (typeof tabId !== 'undefined') {
             tracer.unregisterTab(tabId);
+        //remove the port when the devtools panel is disconnected.
+        var index = ports.indexOf(port);
+            ports.splice(index,1);
         }
     });
 });
+
+/*
+* This function sends the message to all the devtools panel connected to the background page
+* */
+function sendToDevTools(msg){
+    ports.forEach(function(port){
+        port.postMessage(msg);
+    });
+}
 
 /**
  * Listen for messages from the devtools panel. Supported message types are:
@@ -119,8 +134,10 @@ chrome.runtime.onMessage.addListener(
     } else if (message.action === 'getTracerConfig') {
       getTracerConfig(callback);
       return true;
+    } else if(message.action === "af-editor-loaded"){
+        sendToDevTools(message);
     }
-});
+  });
 
 function getOptions() {
   var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));

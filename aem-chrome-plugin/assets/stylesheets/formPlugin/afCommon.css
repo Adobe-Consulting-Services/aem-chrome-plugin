@@ -1,0 +1,108 @@
+body {
+    margin:auto;
+}
+
+a {
+    text-decoration: none;
+}
+
+.afPlugin {
+    background-color: #eee;
+}
+
+.af-heading {
+    margin: 0px;
+    padding-top: 20px;
+}
+
+.tabbingPanel {
+    width: 100%;
+    display: inline-block;
+}
+
+.tabLinkList{
+    margin-bottom: 0px;
+    margin-left: 0px;
+}
+
+.tabLinkList li {
+    display: inline-block;
+    margin: 0px 5px;
+    list-style: none;
+}
+
+.tabLinkList .active {
+    background-color: white;
+    border: 1px solid #A3A3A3;
+    border-bottom: none;
+}
+
+.tabLinkList a {
+    padding: 8px 15px;
+    display: inline-block;
+    font-weight: bold;
+    color: #4a4a4a;
+}
+
+.tabLinkList a:hover {
+    background: #C5C5C5;
+    text-decoration: none;
+}
+
+.tabLinkList li.active a, .tabLinkList li.active a:hover {
+    color: white;
+    text-decoration:none;
+    background: gray;
+}
+
+.content-area {
+    overflow: auto;
+    padding: 15px;
+    border-radius: 3px;
+    box-shadow: -1px 1px 1px rgba(0,0,0,0.15);
+    background: #fff;
+    border: 1px solid #ccc;
+    font-family: Lucida Grande, sans-serif;
+}
+
+.inactive{
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+/*
+TODO
+*/
+.breakpoint{
+    background-color :#E80C0C;
+}
+
+
+.helpTable td,.helpTable th {
+    text-align: center;
+}
+
+.linkDisabled{
+    cursor: not-allowed;
+    padding: 8px 15px;
+    display: inline-block;
+    border-radius: 10px 3px 0px 0px;
+    color: #4c4c4c
+}
+
+
+/*
+TODO
+*/
+
+.af-tab-panelHeader{
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ECECEC), to(#D9D9D9));
+    border-bottom: 1px solid #A3A3A3
+}
+
+.af-tree-ul{
+    -webkit-margin-start: 0px;
+}

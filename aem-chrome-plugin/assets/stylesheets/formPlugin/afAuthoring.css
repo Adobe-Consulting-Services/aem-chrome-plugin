@@ -1,0 +1,66 @@
+.totalTime {
+    background-color: rgba(150, 150, 150, 0.3);
+    margin-left: 10px;
+    border-radius: 0.1875rem;
+}
+
+.count{
+    font-style: italic;
+}
+
+.keywordError{
+    padding: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.keywordError span{
+    color: #818181;
+}
+
+.keywordError li {
+    cursor: pointer;
+    font-size: 15px;
+    margin-left: 15px;
+    margin-top: 10px;
+}
+
+.divSeparator{
+    margin-bottom: 20px;
+}
+
+.performanceList{
+    border-top: black;
+    margin-top: 40px;
+    border-top-style: double;
+    padding-top: 20px;
+}
+
+.performanceList p{
+    font-family: Lucida Grande, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.performanceList li{
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.reloadButton {
+    position: absolute;
+    right: 20px;
+}
+
+.legendText {
+    float: right;
+}
+
+.legendIcon {
+    border: 1px solid;
+    float: right;
+    height: 13px;
+    width: 33px;
+    margin-right: 8px;
+    background-color: red;
+}
