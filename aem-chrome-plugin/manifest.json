@@ -11,9 +11,14 @@
       "assets/javascripts/background/background.js"
     ]
   },
-  "web_accessible_resources" : [
-    "*.jar"
-  ] ,
+  "content_scripts": [
+      {
+          "matches": ["https://*/*", "*://*/*"],
+          "js": ["afContentScript.js"],
+          "run_at": "document_start"
+      }
+  ],
+  "web_accessible_resources": ["afCustomScript.js"],
   "permissions": [
     "storage",
     "webRequest",
