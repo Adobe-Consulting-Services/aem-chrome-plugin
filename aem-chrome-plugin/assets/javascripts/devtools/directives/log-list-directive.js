@@ -39,8 +39,6 @@ angular.module('aem-chrome-plugin-app')
               var builtEntry = null;
 
               if (entry) {
-                // Either no filter specified so include all
-                // Or the filter is specified and matches
                 builtEntry = buildEntry(attrs.format, entry);
 
                 if (builtEntry.html) {
@@ -62,7 +60,6 @@ angular.module('aem-chrome-plugin-app')
           render(html);
         }); // End groupWatch entries
 
-
         scope.$watchGroup(['filter'], function(newValues, oldValues, scope) {
           var html = '',
               filter = (newValues[0] || '').toLowerCase();
@@ -81,7 +78,6 @@ angular.module('aem-chrome-plugin-app')
 
           render(html);
         }); // End groupWatch filter
-
 
         function render(html) {
           if (html) {
@@ -143,24 +139,9 @@ angular.module('aem-chrome-plugin-app')
         function logsTemplate(entry) {
           var i = 0,
               haystack = entry.level + ' ' + entry.logger + ' ' + entry.message,
-              html = '<li><p><strong>';
+              html = '<li><p><strong>' + entry.level + ' ' + entry.logger + '</strong></p>';
 
-          html += entry.level;
-          html += ' ';
-          html += entry.logger;
-          html += '</strong></p>';
-          html += '<p>' + entry.message + '</p>';
-
-          if (entry.params && entry.params.length > 0) {
-            html += '<ul class="params-list">';
-            for (i = 0; i < entry.params.length; i++) {
-              html += '<li>' + entry.params[i] + '</li>';
-              haystack += ' ' + entry.params[i];
-            }
-            html += '</ul>';
-          }
-
-          html +='</li>';
+          html += '<p>' + entry.message + '</p></li>';
 
           return {
             html: html,
