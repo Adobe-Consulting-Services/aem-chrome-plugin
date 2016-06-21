@@ -21,6 +21,7 @@
 <html ng-app="aem-chrome-plugin-app">
   <head>
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/panel.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/common.css">
 
     <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
     <script src="vendor/assets/javascripts/underscore-min.js"></script>
@@ -62,15 +63,15 @@
   </head>
   <body class="aem-chrome-plugin" aem-chrome-plugin-panels>
     <div>
-        <div id='aemPluginTab' class="tabbed-pane">
+        <div id="aemPluginTab" class="tabbed-pane">
             <div class="tabbed-pane-header">
                 <div class="tabbed-pane-header-contents">
-                    <ul class="tabbed-pane-header-tabs">
+                    <ul class="aem-plugin-tabs tabbed-pane-header-tabs">
                         <li class="tabbed-pane-header-tab">
-                            <a href="#tracerPlugin" class="tabbed-pane-header-tab-title">TRACER</a>
+                            <a href="#tracerPlugin" class="tabbed-pane-header-tab-title">Tracer</a>
                         </li>
                         <li class="tabbed-pane-header-tab">
-                            <a href="#adaptiveFormsPlugin" class="tabbed-pane-header-tab-title">ADAPTIVE FORM</a>
+                            <a href="#adaptiveFormsPlugin" class="tabbed-pane-header-tab-title">Adaptive Form</a>
                         </li>
                     </ul>
                 </div>
@@ -362,25 +363,22 @@
 
                 <div class="inactive" id="adaptiveFormsPlugin">
                     <div class="afPlugin">
-                        <h1 class="af-heading">
-                        </h1>
 
                         <div id="authoring" class="authoring inactive" >
                             <div>
-                                <button id="reloadAuthoringTab" class="reloadButton">Reload</button>
+                                <button id="reloadAuthoringTab" class="reload-button">Reload</button>
                             </div>
 
                             <div class="tabbingPanel">
-
                                 <div class="af-tab-panelHeader">
                                     <div>
                                         <ul class="tabLinkList">
-                                            <li class="active"><a href="#tab-performance" id="performanceTabPanelHeader">Performance </a></li>
-                                            <li><a href="#tab-keyword-error" id="keywordTabPanelHeader"> Keyword Errors </a></li>
-                                            <li><a href="#tab-bindref-error" id="bindRefTabPanelHeader"> BindRef Errors </a></li>
-                                            <li><span class="linkDisabled"> Logging</span></li>
-                                            <li><span class="linkDisabled"> Debugger </span></li>
-                                            <li><span class="linkDisabled"> Guide Bridge Playground</span></li>
+                                            <li class="active"><a href="#tab-performance" id="performanceTabPanelHeader">Performance</a></li>
+                                            <li><a href="#tab-keyword-error" id="keywordTabPanelHeader">Keyword Errors</a></li>
+                                            <li><a href="#tab-bindref-error" id="bindRefTabPanelHeader">BindRef Errors</a></li>
+                                            <li><span class="linkDisabled">Logging</span></li>
+                                            <li><span class="linkDisabled">Debugger</span></li>
+                                            <li><span class="linkDisabled">Guide Bridge Playground</span></li>
                                         </ul>
                                     </div>
                                 </div>
@@ -389,56 +387,46 @@
 
                                     <div id="tab-performance" class="active">
                                         <div>
-                                            <div class="legendText"> Error</div>
-                                            <div class="legendIcon"></div>
+                                            <div class="legend-text"> Error</div>
+                                            <div class="legend-icon"></div>
                                         </div>
 
                                         <div id="authoringTree"></div>
                                     </div>
 
                                     <div id="tab-keyword-error" class="inactive">
-                                        <div class="keywordError">
-                                            <div class="divSeparator">
-                                                <span>Components with error in Name property :</span>
+                                        <div class="keywordError emptyable-container">
+                                           <p class="show-on-empty ok">No Keyword errors detected</p>
 
-                                                <div>
-                                                    <ul id="nameError" class="af-tree-ul">
+                                           <div class="hide-on-empty">
+                                             <h3>Components with error in Name property:</h3>
+                                             <ul id="nameError" class="af-tree-ul"></ul>
+                                           </div>
 
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div class="divSeparator">
-                                                <span>Components with error in Title property :</span>
-
-                                                <div>
-                                                    <ul id="labelError" class="af-tree-ul">
-
-                                                    </ul>
-                                                </div>
-                                            </div>
+                                           <div class="hide-on-empty">
+                                             <h3>Components with error in Title property:</h3>
+                                             <ul id="labelError" class="af-tree-ul"></ul>
+                                           </div>
                                         </div>
                                     </div>
 
                                     <div id="tab-bindref-error" class="inactive">
-                                        <div class="keywordError">
-                                            <div class="divSeparator">
-                                                <span>The following fields have incorrect bindRef value:</span>
-                                                <ul id="bindrefErrorList" class="af-tree-ul">
+                                        <div class="keywordError emptyable-container">
+                                            <p class="show-on-empty ok">No BindRef errors detected</p>
 
-                                                </ul>
+                                            <div class="hide-on-empty">
+                                              <h3>Field with incorrect bindRef value:</h3>
+                                              <ul id="bindrefErrorList" class="af-tree-ul"></ul>
                                             </div>
-                                            <div class="divSeparator">
 
-                                                <span>The following fields should have a bindRef property:</span>
-                                                <ul id="noBindrefErrorList" class="af-tree-ul">
-
-                                                </ul>
+                                            <div class="hide-on-empty">
+                                                <h3>Fields missing a bindRef property:</h3>
+                                                <ul id="noBindrefErrorList" class="af-tree-ul"></ul>
                                             </div>
-                                            <div class="divSeparator">
-                                                <span>The following fields have incorrect minOccur value:</span>
-                                                <ul id="minOccurErrorList" class="af-tree-ul">
 
-                                                </ul>
+                                            <div class="hide-on-empty">
+                                                <h3>Fields with incorrect minOccur value:</h3>
+                                                <ul id="minOccurErrorList" class="af-tree-ul"></ul>
                                             </div>
                                         </div>
                                     </div>
@@ -453,9 +441,9 @@
                                 <div class="af-tab-panelHeader">
                                     <div>
                                         <ul class="tabLinkList">
-                                            <li><span class="linkDisabled"> Performance </span></li>
-                                            <li><span class="linkDisabled"> KeyWord Errors </span></li>
-                                            <li><span class="linkDisabled"> BindRef Errors </span></li>
+                                            <li><span class="linkDisabled">Performance</span></li>
+                                            <li><span class="linkDisabled">Keyword Errors</span></li>
+                                            <li><span class="linkDisabled">BindRef Errors</span></li>
                                             <li class="active"><a href="#tab-af-log" id="logTabPanelHeader">Logging</a></li>
                                             <li><a href="#tab-debug" id="debugTabPanelHeader">Debugger</a></li>
                                             <li><a href="#tab-bridge" id="bridgeTabPanelHeader">Guide Bridge Playground</a></li>
@@ -469,7 +457,7 @@
                                         <div>
                                             <div class="runtimeComponentTree"></div>
                                             <div class="debugListing">
-                                                <p class="tab-help">Scripts to debug : </p>
+                                                <p class="tab-help">Scripts to debug:</p>
                                                 <ul id="debugList" class="af-tree-ul"></ul>
                                             </div>
                                         </div>
@@ -477,86 +465,77 @@
 
                                     <div id="tab-bridge" class="inactive">
                                         <div>
-                                            <div class="tab-help">
-                                                <p>GuideBridge is bridge API using which, wrapper html (page hosting/embedding
-                                                    Adaptive Forms) or external window scripts like parent window javascript, can
-                                                    communicate with current Adaptive Form and manipulate or query it's current
-                                                    state. </p>
+                                            <div class="info">
+                                                GuideBridge is bridge API that can communicate with the current Adaptive Form and manipulate or query it's state.
                                             </div>
+
                                             <div id="bridgeApiList">
-                                                <select id="apiListDropdown" class="dropdown"></select><br>
+                                                <select id="apiListDropdown" class="emphasized-dropdown"></select>
+                                                <br/>
 
                                                 <div id="selected-api-info" class="inactive sectionInfo">
                                                     <div id="api-description">
-                                                        <h3><span>DESCRIPTION : </span></h3>
-
-                                                        <div id="apiDetail">
-                                                        </div>
+                                                        <h3><span>DESCRIPTION</span></h3>
+                                                        <div id="apiDetail"></div>
                                                     </div>
                                                     <div id="api-parameters">
-                                                        <h3><span>PARAMETERS :</span></h3>
-
-                                                        <div id="parameterDescription">
-                                                        </div>
+                                                        <h3><span>PARAMETERS</span></h3>
+                                                        <div id="parameterDescription"></div>
                                                     </div>
                                                     <div id="api-return-type">
-                                                        <h3><span>RETURNS :</span></h3>
-
-                                                        <div id="returnTypeDetail">
-                                                        </div>
+                                                        <h3><span>RETURNS</span></h3>
+                                                        <div id="returnTypeDetail"></div>
                                                     </div>
                                                 </div>
+
                                                 <div id="parameterInputList" class="inactive sectionInfo">
-                                                    <h3><span>Enter PARAMETERS </span></h3><br>
-
-                                                    <div id="a" class="parameterInput ">
-
-                                                    </div>
+                                                    <h3><span>Enter PARAMETERS</span></h3><br/>
+                                                    <div id="a" class="parameterInput"></div>
                                                 </div>
                                                 <div id="parameterExample" class="sectionInfo">
-                                                    <h3><span> EXAMPLE : </span></h3>
+                                                    <h3><span>EXAMPLE</span></h3>
                                                     <code></code>
                                                 </div>
-                                                <button class="runButton"> Run</button>
+                                                <br/>
+                                                <hr/>
+                                                <button class="run-button">Run &#9658;</button>
                                             </div>
-                                            <div class="apiResult inactive"> Result :
+                                            <div class="apiResult inactive">
+                                                Result:
                                                 <div id="bridgeApiResultValue"></div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div id="tab-af-log" class="active">
-                                        <div>
-                                            <div class="loggingDiv">
+                                      <div class="warning">
+                                          Enabling logs will refresh the page. Open Chrome's Console Tab to see the logs.
+                                      </div>
 
-                                                XFA : <select id="logCategory-xfa" name="xfaCategory"></select>
-                                                View : <select id="logCategory-xfaView" name="xfaViewCategory"></select>
-                                                Performance : <select id="logCategory-xfaPerf" name="xfaPerfCategory"></select>
-                                                AF : <select id="logCategory-aF" name="adaptiveFormCategory"></select>
+                                      <ul class="af-log-levels">
+                                        <li><label>Enable:</label><input type="checkbox" id="enableLog" name="enableLogging" value="logging"/></li>
+                                        <li><label>XFA:</label><select id="logCategory-xfa" name="xfaCategory"></select></li>
+                                        <li><label>View:</label><select id="logCategory-xfaView" name="xfaViewCategory"></select></li>
+                                        <li><label>Performance:</label><select id="logCategory-xfaPerf" name="xfaPerfCategory"></select></li>
+                                        <li><label>AF:</label><select id="logCategory-aF" name="adaptiveFormCategory"></select></li>
+                                      </ul>
 
-                                                <input type="checkbox" id="enableLog" name="enableLogging" value="logging"/> Enable Logs
-                                                <div class="af-warning"> Enabling logs will refresh the page. To see the logs,
-                                                    please go the console tab.
-                                                </div>
-                                                <br>
+                                      <p>
+                                          This Logger configuration enables logging for a form.
+                                      </p>
+                                      <p>
+                                        The log configuration is made up of the logger category and a corresponding log level.
+                                      </p>
+                                      <p>
+                                        In the log URL, the log configuration query string parameter is defined as follows: <strong>{a level}-{b level}-{c level}-{d level}</strong>
+                                      </p>
+                                      <p>
+                                       For example: to enable a logger to have the following settings...
+                                       <br/>
+                                       XFA: INFO, AF: ALL and OFF for other categories, the value of <strong>window.AF_log_config</strong> should be <strong>a4-b0-c0-d7</strong>
+                                      </p>
 
-                                                <div>
-                                                    <div id="log-help">
-                                           <span>The Logger utility enables logging for a form and helps you debug form-related issues.
-                                            One can configure Logger based on the requirements and set the level and category for it for any specific request.
-                                            The log configuration is made up of the log level and the logger category. <br><br>
-                                            In the log URL, the log configuration query string parameter is defined as follows:{a level}-{b level}-{c level}-{d level}<br><br>
-                                            For example, to enable a logger to have the following settings :
-                                                xfa level : INFO, AF Level : ALL and OFF for other categories, the value of window.AF_log_config should be "a4-b0-c0-d7"
-                                           </span>
-                                                    </div>
-
-                                                </div>
-                                            </div>
-
-                                        </div>
                                     </div>
-
                                 </div>
 
                             </div>

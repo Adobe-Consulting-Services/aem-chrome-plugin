@@ -1,94 +1,68 @@
-.apiResult{
+.afPlugin .apiResult{
     margin-top: 20px;
     font-size: 16px;
 }
 
-.sectionInfo{
-    font-size: 14px;
+.afPlugin .sectionInfo span {
+    color: #000;
 }
 
-.sectionInfo span{
-    color: #A35A00;
+.afPlugin .parameterInput div {
+    margin-bottom: 0;
 }
 
-.parameterName {
-    color: #A35A00;
+.afPlugin .parameterInput input{
+    margin-left: 1rem;
+    width: 300px;
+    padding: .25rem;
 }
 
-.parameterInput input{
-    padding: 10px;
-    border: solid 5px #c9c9c9;
-    transition: border 0.3s;
-    margin-left: 10px;
-    width:300px;
+.afPlugin .parameterSignature code {
+  font-size: 1rem;
 }
 
-.loggingDiv {
-    font-size: 16px;
-}
-
-.loggingDiv select{
-    margin-right: 20px;
-}
-
-.loggingDiv input{
-    padding: 5px;
-    border: solid 5px #c9c9c9;
-    transition: border 0.3s;
-    margin-left: 5px;
-    width: 43px;
-    margin-right: 10px ;
-}
-
-.af-warning{
-    margin: 7px 2px;
-    padding: 5px;
-    color: #9F6000;
-    background-color: #FEEFB3;
-}
-
-.runButton{
+.afPlugin .runButton{
     margin-top: 15px;
     padding: 3px 25px;
     font-size: 16px;
 }
 
-.runButton:hover,
-.runButton:focus {
+.afPlugin .runButton:hover,
+.afPlugin .runButton:focus {
     cursor: pointer;
 }
 
-.tab-help {
+.afPlugin .tab-help {
     color: #818181;
     font-weight: bold;
     font-size: 16px
 }
 
-.dropdown {
+.afPlugin .dropdown {
     background: #444;
     padding: 6px;
     border-radius: 5px;
     border: 1px solid #000;
     font-size: 14px;
     color: #fff;
-
 }
 
-.parameterListItem {
+.afPlugin .parameterListItem {
     margin-left: 20px;
+    margin-bottom: 1rem;
 }
 
-.runtimeComponentTree{
+.afPlugin .runtimeComponentTree{
     width: 70%;
     float: left;
 }
 
-.debugListing {
+.afPlugin .debugListing {
     width: 30%;
     float: right;
 }
 
-.debugButton{
+.afPlugin .debugButton{
     background: grey;
     box-shadow: 0 0 7px gray;
     margin-left: 10px;
@@ -96,4 +70,20 @@
     border: 2px solid #f5f5f5;
     border-radius: 50%;
     -webkit-box-sizing: content-box;
+}
+
+
+.af-log-levels {
+  list-style: none;
+}
+
+.af-log-levels li {
+  border-bottom: 1px solid #eee;
+  margin-bottom: .5rem;
+  padding-bottom: .5rem;
+}
+
+.af-log-levels li label {
+  display: inline-block;
+  width: 6rem;
 }

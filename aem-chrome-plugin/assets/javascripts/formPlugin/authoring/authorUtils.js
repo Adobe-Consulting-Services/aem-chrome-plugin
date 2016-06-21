@@ -68,6 +68,38 @@
 
     var afPluginAuthoring = afPlugin.author = {
 
+        manageEmptyContainer: function(elements, childrenSelector) {
+          var children = [];
+
+          if(!elements || elements.length === 0) {
+            return;
+          }
+
+          _.each(elements, function ($el) {
+            var elChildren = [];
+
+            if (childrenSelector) {
+              elChildren = $el.find(childrenSelector).toArray();
+            } else {
+              elChildren = $el.children().toArray();
+            }
+
+            if (elChildren.length === 0) {
+                $el.closest('.hide-on-empty').hide();
+            } else {
+                $el.closest('.hide-on-empty').show();
+            }
+
+            children = children.concat(elChildren);
+          });
+
+          if (children.length === 0) {
+              elements[0].closest('.emptyable-container').find('.show-on-empty').show();
+          } else {
+              elements[0].closest('.emptyable-container').find('.show-on-empty').hide();
+          }
+        },
+
         createPerformanceTab: function () {
             chrome.devtools.inspectedWindow.eval("window.afPlugin._getTimingMap()", function (result, isException) {
                 afPlugin.author.timingMap = result;
@@ -156,26 +188,29 @@
                 afPluginAuthoring.addItemToBindRefError($compName, name, path, $("#bindrefErrorList"));
             }
 
+            afPluginAuthoring.manageEmptyContainer([$("#minOccurErrorList"), $('#noBindrefErrorList'), $("#bindrefErrorList")], 'li');
+
+
             $compName.on("click", afPluginAuthoring.showNodeInfo);
 
             // add timing info to the list item.
-            if (timingMap[path] != undefined) {
-                var $totalTime = $("<span class='totalTime'/>");
+            if (typeof timingMap[path] !== 'undefined') {
+                var $totalTime = $("<span class='af-performance-time'/>");
                 if (timingMap[path].totalTime < 100) {
-                    $totalTime.text("(" + timingMap[path].totalTime + "ms)");
+                    $totalTime.text(timingMap[path].totalTime + "ms");
                 } else {
                     improvementList.push({path: path, name: obj.name});
-                    $totalTime.text("(" + (timingMap[path].totalTime / 1000).toFixed(2) + "s)").css("background-color", "rgb(255, 167, 95)");
+                    $totalTime.text((timingMap[path].totalTime / 1000).toFixed(2) + "s").addClass("af-performance-slow");
                 }
                 $compName.append($totalTime);
             }
             $item.append($compName);
 
             // create tags for panel and item count
-            $panelCount = $("<span class='count' />");
+            $panelCount = $("<span class='count'/>");
             $item.append($panelCount);
 
-            $itemCount = $("<span class='count' />");
+            $itemCount = $("<span class='count'/>");
             $item.append($itemCount);
 
             if (_.contains(keywords, obj.name)) {
@@ -191,11 +226,11 @@
             dataObj = afPluginAuthoring.buildTree(obj, $item, path, flag);
 
             //populate the panel count and item count
-            if (dataObj.panelCount != 0) {
-                $panelCount.text("   TOTAL NO. OF CHILD PANELS :  " + dataObj.panelCount + "  , ");
+            if (dataObj.panelCount !== 0) {
+                $panelCount.html("Number of child panels: <strong>" + dataObj.panelCount + "</strong> &mdash;");
             }
-            if (dataObj.itemCount != 0) {
-                $itemCount.text("  TOTAL NUMBER OF ITEMS :  " + dataObj.itemCount + "    ");
+            if (dataObj.itemCount !== 0) {
+                $itemCount.html("Number of items: <strong>" + dataObj.itemCount + "</strong>");
             }
 
             list.append($item);
@@ -264,6 +299,8 @@
                     $labelErrorDiv.append($item);
                 }
             });
+
+            afPluginAuthoring.manageEmptyContainer([$nameErrorDiv, $labelErrorDiv], 'li');
         },
 
         /*
@@ -282,17 +319,15 @@
         },
 
         createListItemForFocus: function (parent, name, path) {
-
             var $li = parent,
                 $errorDetailDiv = $("<div/>");
-            $("<div/>").text("COMPONENT NAME : " + name).appendTo($errorDetailDiv);
-            $("<div/>").text("COMPONENT PATH : " + path).appendTo($errorDetailDiv);
+            $("<div/>").html("Component name: <strong>" + name + "</strong>").appendTo($errorDetailDiv);
+            $("<div/>").html("Component path: <strong>" + path + "</strong>").appendTo($errorDetailDiv);
             $li.on("click", function () {
-                chrome.devtools.inspectedWindow.eval("window.afPlugin._setAuthFocus(" + JSON.stringify(path) + ")")
+                chrome.devtools.inspectedWindow.eval("window.afPlugin._setAuthFocus(" + JSON.stringify(path) + ")");
             });
             $li.append($errorDetailDiv);
         }
-
-    }
+    };
 
 })(window,window.afPlugin);

@@ -1,0 +1,82 @@
+.info,
+.warning,
+.ok {
+  margin: .5rem 0 1rem 0;
+  padding: .5rem 1rem;
+  border-radius: 2px;
+  font-size: .9rem;
+}
+
+.info {
+
+  color: #067DBC;
+  background-color: #E2EFFE;
+}
+
+.warning {
+  color: #9F6000;
+  background-color: #FEEFB3;
+}
+
+.ok {
+  color: green;
+  background-color: #9cf28d;
+}
+
+
+
+
+.right-help {
+  float: right;
+  width: 50%;
+}
+
+.content-area {
+  background: white;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.inactive{
+    display: none;
+}
+
+.active {
+    display: block;
+}
+
+.emphasized-dropdown {
+  font-size: 1rem;
+}
+
+.run-button {
+  border-radius: 3px;
+  color: white;
+  background-color: green;
+  border: 0;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+}
+
+.aem-plugin-tabs .tabbed-pane-header-tab.ui-tabs-active {
+  background-color: #eee;
+}
+
+.hide-on-empty {
+  margin-bottom: 1rem;
+}
+
+
+hr {
+  border: 0;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 1.25rem;
+}
+
+
+code {
+  font-size: 1rem;
+  border: dashed 1px #ccc;
+  padding: 1rem;
+  display: block;
+}
