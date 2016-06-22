@@ -45,5 +45,6 @@ function loadFrame(url) {
         $("#runtime").removeClass("inactive").addClass("active");
         $("#authoring").removeClass("active").addClass("inactive");
         $(document).trigger("loadRuntimeFrame.afPlugin");
+        $("#logTabPanelHeader").click();
     }
 }

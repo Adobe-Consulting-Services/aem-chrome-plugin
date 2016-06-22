@@ -33,7 +33,7 @@
 
             var apiNames = _.keys(guideBridgeUtils.listing),
                 $select = $('#apiListDropdown'),
-                $runButton = $(".runButton");
+                $runButton = $(".run-button");
 
             $runButton.click(guideBridgeUtils.executeGuideBridgeScript);
             $select.empty();

@@ -227,7 +227,7 @@
 
             //populate the panel count and item count
             if (dataObj.panelCount !== 0) {
-                $panelCount.html("Number of child panels: <strong>" + dataObj.panelCount + "</strong> &mdash;");
+                $panelCount.html("Number of child panels: <strong>" + dataObj.panelCount + "</strong> , ");
             }
             if (dataObj.itemCount !== 0) {
                 $itemCount.html("Number of items: <strong>" + dataObj.itemCount + "</strong>");

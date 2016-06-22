@@ -4,6 +4,7 @@
 
 .afPlugin .keywordError li {
     cursor: pointer;
+    margin-top: 10px;
 }
 
 .afPlugin .reload-button {

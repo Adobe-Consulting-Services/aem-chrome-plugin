@@ -124,7 +124,7 @@ function addCustomCompileExpression() {
 
     // _compileExpression is a private API. Please don't use this API for production purposes as it can change anytime.
     guidelib.model.Scriptable.prototype._compileExpression = function (expression, affectedProp) {
-        if (_.contains(guidelib.runtime.debugMap, this.name)) {
+        if (_.contains(window.afPlugin.debugMap, this.name)) {
             var debugStr = "debugger;\\n",
                 evalInd = expression.indexOf("eval("),
                 debuggerInd = expression.indexOf("debugger");
@@ -149,12 +149,12 @@ function loadRuntimeUtils() {
         var model = guideBridge._resolveId(id),
             som = model.somExpression;
         guideBridge.setFocus(som);
-        guidelib.runtime.debugMap = guidelib.runtime.debugMap || [];
-        if (!_.contains(guidelib.runtime.debugMap, model.name)) {
-            guidelib.runtime.debugMap.push(model.name);
+        window.afPlugin.debugMap = window.afPlugin.debugMap || [];
+        if (!_.contains(window.afPlugin.debugMap, model.name)) {
+            window.afPlugin.debugMap.push(model.name);
         } else if (!flag) {
-            var index = guidelib.runtime.debugMap.indexOf(model.name);
-            guidelib.runtime.debugMap.splice(index, 1);
+            var index = window.afPlugin.debugMap.indexOf(model.name);
+            window.afPlugin.debugMap.splice(index, 1);
         }
 
         // _collectExpressions is a private API. Please don't use this API for production purposes as it can change anytime.
@@ -220,7 +220,7 @@ function loadRuntimeUtils() {
         // _setExpressionContext is a private API. Please don't use this API for production purposes as it can change anytime.
         model._setExpressionContext(model, model.index);
         // _expressionHandler is a private API. Please don't use this API for production purposes as it can change anytime.
-        model._expressionHandler(scriptName);
+        model.executeExpression(scriptName);
     };
 
 }
