@@ -87,3 +87,10 @@
   display: inline-block;
   width: 6rem;
 }
+
+.af-script-play-button{
+    height: 20px;
+    opacity: 0.6;
+    margin-left: 6px;
+    vertical-align: middle;
+}

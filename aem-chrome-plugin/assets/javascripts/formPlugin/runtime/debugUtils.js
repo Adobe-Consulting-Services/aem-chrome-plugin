@@ -27,7 +27,7 @@
         $("#bridgeApiResultValue,#debugList,.runtimeComponentTree").empty();
         $("#debugTabPanelHeader").off("click.afPlugin").one("click.afPlugin",window.afPlugin.runtime.debugUtils.focusDebugTab);
         // clear the debug map in guidelib
-        chrome.devtools.inspectedWindow.eval("guidelib.runtime.debugMap = []");
+        chrome.devtools.inspectedWindow.eval("window.afPlugin.debugMap = []");
         debugObj = {};
     });
 
@@ -101,9 +101,16 @@
                     $scriptList = $("<ul/>").addClass('af-tree-ul').appendTo($li);
                 if( value && value.length > 0){
                     for (var i = 0; i < value.length; i++) {
-                        var $playButton = $("<div/>").css("display","inline-block").append(($("<img/>").attr("src","assets/images/playIcon.png").css("height","20px").css({'opacity': '0.6','margin-left': '6px','vertical-align':'middle'}).attr("data-name", name).attr("data-id", id))).click(afPluginRuntime.executeScript),
+                        var $playIcon = $("<img/>").attr("src","assets/images/playIcon.png")
+                            .addClass('af-script-play-button')
+                            .attr("data-name", name)
+                            .attr("data-id", id);
+
+                        var $playButtonDiv = $("<div/>").css("display","inline-block")
+                                                     .append($playIcon)
+                                                     .click(afPluginRuntime.executeScript),
                             $item = $("<li/>"),
-                            $scriptName = $("<h3/>").append($("<span/>").text(value[i])).append($playButton);
+                            $scriptName = $("<h3/>").append($("<span/>").text(value[i])).append($playButtonDiv);
                         $item.append($scriptName);
                         $scriptList.append($item);
                     }
