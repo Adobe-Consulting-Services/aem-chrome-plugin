@@ -1,6 +1,6 @@
 {
   "name": "AEM Chrome Plug-in",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "manifest_version": 2,
   "description": "Devtools panel for AEM development. Requires AEM 6.1+ and Apache Sling Log Tracer 1.0.0+",
   "devtools_page": "devtools.html",
@@ -20,6 +20,7 @@
   ],
   "web_accessible_resources": ["afCustomScript.js"],
   "permissions": [
+    "tabs",
     "storage",
     "webRequest",
     "webRequestBlocking",

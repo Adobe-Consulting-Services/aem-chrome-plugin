@@ -33,7 +33,7 @@ angular.module('aem-chrome-plugin-app')
       password: 'admin',
       tracerIds: 'oak-query,oak-writes',
       tracerSets: [],
-      host: 'http://localhost:4502',
+      servletContext: '',
       maxHistory: 200
   };
 

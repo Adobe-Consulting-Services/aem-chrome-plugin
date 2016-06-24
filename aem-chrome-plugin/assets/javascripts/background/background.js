@@ -79,7 +79,7 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
           password: 'admin',
           tracerIds: 'oak-query,oak-writes',
           tracerSets: [],
-          host: 'http://localhost:4502',
+          servletContext: '',
           maxHistory: 200
       })
   );
@@ -140,15 +140,26 @@ chrome.runtime.onMessage.addListener(
   });
 
 function getOptions() {
-  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
-  return {
-    host: options.host,
-    user: options.user,
-    password: options.password,
-    url: function(url) {
-        return options.host + url;
-    }
-  };
+  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
+      origin = 'http://localhost:4502';
+
+      // Get the origin of the active window
+      chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
+          var url;
+          if (tabs && tabs.length === 1) {
+              url = new URL(tabs[0].url);
+              origin = url.origin;
+          }
+      });
+
+      return {
+        host: origin + (options.servletContext || ''),
+        user: options.user,
+        password: options.password,
+        url: function(url) {
+            return origin + (options.servletContext || '') + url;
+        }
+      };
 }
 
 function getWithAuth(url, callback) {
