@@ -67,9 +67,9 @@ function addAuthoringUtils() {
                 if (map[value.path]) {
                     var totalTime = map[value.path].totalTime + value.config.totalTime;
                     var selfTime = map[value.path].selfTime + value.config.selfTime;
-                    map[value.path] = {'totalTime': totalTime, 'selfTime': selfTime}
+                    map[value.path] = {'totalTime': totalTime, 'selfTime': selfTime};
                 } else {
-                    map[value.path] = {'totalTime': value.config.totalTime, 'selfTime': value.config.selfTime}
+                    map[value.path] = {'totalTime': value.config.totalTime, 'selfTime': value.config.selfTime};
                 }
             }
         });
@@ -191,7 +191,7 @@ function loadRuntimeUtils() {
             list = ["getDataXML", "getGuideState", "getFileAttachmentsInfo"],
             returnValue,
             options = {success: function (data) {
-                returnValue = data
+                returnValue = data;
             }};
 
         // for API's included in the list, we override the parameters passed.
