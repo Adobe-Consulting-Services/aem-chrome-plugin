@@ -22,42 +22,47 @@
   <head>
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/panel.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/common.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/formPlugin/afCommon.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/formPlugin/afAuthoring.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/formPlugin/afRuntime.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afCommon.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afAuthoring.css">
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afRuntime.css">
 
     <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
     <script src="vendor/assets/javascripts/underscore-min.js"></script>
 
-    <script src="assets/javascripts/formPlugin/namespace.js"></script>
-    <script src="assets/javascripts/formPlugin/init.js"></script>
-    <script src="assets/javascripts/formPlugin/authoring/authorUtils.js"></script>
-    <script src="assets/javascripts/formPlugin/runtime/debugUtils.js"></script>
-    <script src="assets/javascripts/formPlugin/runtime/bridgeUtils.js"></script>
-    <script src="assets/javascripts/formPlugin/runtime/bridgeApiList.js"></script>
-    <script src="assets/javascripts/formPlugin/runtime/logger.js"></script>
-    <script src="assets/javascripts/formPlugin/panel.js"></script>
+    <!-- Adaptive Form Plugin -->
+
+    <script src="assets/javascripts/form-plugin/namespace.js"></script>
+    <script src="assets/javascripts/form-plugin/init.js"></script>
+    <script src="assets/javascripts/form-plugin/authoring/authorUtils.js"></script>
+    <script src="assets/javascripts/form-plugin/runtime/debugUtils.js"></script>
+    <script src="assets/javascripts/form-plugin/runtime/bridgeUtils.js"></script>
+    <script src="assets/javascripts/form-plugin/runtime/bridgeApiList.js"></script>
+    <script src="assets/javascripts/form-plugin/runtime/logger.js"></script>
+    <script src="assets/javascripts/form-plugin/panel.js"></script>
+
+    <!-- Tracer Plugin -->
 
     <script src="vendor/assets/javascripts/jquery-ui-1.9.2.tabs.min.js"></script>
     <script src="vendor/assets/javascripts/stupidtable.min.js"></script>
     <script src="vendor/assets/javascripts/URI.min.js"></script>
     <script src="vendor/assets/javascripts/angular.min.js"></script>
 
-    <script src="assets/javascripts/devtools/app.js"></script>
+    <script src="assets/javascripts/tracer-plugin/app.js"></script>
 
-    <script src="assets/javascripts/devtools/filters/remove-host-filter.js"></script>
-    <script src="assets/javascripts/devtools/filters/log-blacklist-filter.js"></script>
-    <script src="assets/javascripts/devtools/filters/query-blacklist-filter.js"></script>
+    <script src="assets/javascripts/tracer-plugin/filters/remove-host-filter.js"></script>
+    <script src="assets/javascripts/tracer-plugin/filters/log-blacklist-filter.js"></script>
+    <script src="assets/javascripts/tracer-plugin/filters/query-blacklist-filter.js"></script>
 
-    <script src="assets/javascripts/devtools/directives/dividers-directive.js"></script>
-    <script src="assets/javascripts/devtools/directives/log-list-directive.js"></script>
+    <script src="assets/javascripts/tracer-plugin/directives/dividers-directive.js"></script>
+    <script src="assets/javascripts/tracer-plugin/directives/log-list-directive.js"></script>
 
-    <script src="assets/javascripts/devtools/services/requests-service.js"></script>
-    <script src="assets/javascripts/devtools/services/communications-service.js"></script>
-    <script src="assets/javascripts/devtools/services/tracer-status-service.js"></script>
+    <script src="assets/javascripts/tracer-plugin/services/requests-service.js"></script>
+    <script src="assets/javascripts/tracer-plugin/services/communications-service.js"></script>
+    <script src="assets/javascripts/tracer-plugin/services/tracer-status-service.js"></script>
+    <script src="assets/javascripts/tracer-plugin/services/download-service.js"></script>
 
-    <script src="assets/javascripts/devtools/controllers/requests-controller.js"></script>
-    <script src="assets/javascripts/devtools/controllers/options-controller.js"></script>
+    <script src="assets/javascripts/tracer-plugin/controllers/requests-controller.js"></script>
+    <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
 
   </head>
   <body class="aem-chrome-plugin" aem-chrome-plugin-panels>
@@ -250,8 +255,7 @@
                                     </li>
                                     <!-- Request Progress -->
                                     <li class="tabbed-pane-header-tab">
-                                        <a href="#tab-request-progress" class="tabbed-pane-header-tab-title">Request
-                                            Progress
+                                        <a href="#tab-request-progress" class="tabbed-pane-header-tab-title">Request Progress
                                             <span ng-show="activeTracerData.requestProgressLogs">({{ activeTracerData.requestProgressLogs.length }})</span></a>
                                     </li>
                                     <!-- Queries Tab -->
@@ -270,7 +274,6 @@
                         </div>
 
                         <div class="tabbed-pane-content data-grid data-grid-details">
-
                             <!-- Log Tab Panel -->
                             <div id="tab-log">
                                 <div class="tab-filter-container">
@@ -280,6 +283,11 @@
                                                placeholder="Filter Logs"
                                                ng-model="controls.logFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+
+                                         <button
+                                            class="download-button"
+                                            ng-show="notEmpty(activeTracerData.logs)"
+                                            ng-click="download(activeTracerData.logs, 'logs')">Download</button>
                                     </div>
 
                                     <div aem-chrome-plugin-log-list
@@ -290,7 +298,6 @@
                                          filter="controls.logFilter"
                                          ng-show="notEmpty(activeTracerData.logs)">
                                     </div>
-
                                 </div>
                             </div>
 
@@ -303,6 +310,12 @@
                                                placeholder="Filter Request Progress"
                                                ng-model="controls.requestProgressFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+
+                                         <button
+                                            class="download-button"
+                                            ng-show="notEmpty(activeTracerData.requestProgressLogs)"
+                                            ng-click="download(activeTracerData.requestProgressLogs, 'request-progress', 'text/plain')">Download</button>
+
                                     </div>
 
                                     <div aem-chrome-plugin-log-list
@@ -326,6 +339,11 @@
                                                placeholder="Filter Queries"
                                                ng-model="controls.queryFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+
+                                         <button
+                                            class="download-button"
+                                            ng-show="notEmpty(activeTracerData.queries)"
+                                            ng-click="download(activeTracerData.queries, 'queries')">Download</button>
                                     </div>
 
                                     <div aem-chrome-plugin-log-list

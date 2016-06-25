@@ -475,7 +475,12 @@ table#breakdown td.meter-col {
 }
 
 .tab-filter-wrapper input {
-  width: 100%;
+  width: 600px;
+  float: left;
+}
+
+.download-button {
+  margin-left: 1rem;
 }
 
 .tab-filter-container {
