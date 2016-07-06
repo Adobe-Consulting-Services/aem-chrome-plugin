@@ -139,7 +139,7 @@ chrome.runtime.onMessage.addListener(
     }
   });
 
-function getOptions() {
+function getOptions(optionsCallback) {
   var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
       origin = 'http://localhost:4502';
 
@@ -150,33 +150,33 @@ function getOptions() {
               url = new URL(tabs[0].url);
               origin = url.origin;
           }
+          var optionsData = {
+              host: origin + (options.servletContext || ''),
+              user: options.user,
+              password: options.password,
+              url: function(url) {
+                  return origin + (options.servletContext || '') + url;
+              }
+          };
+          optionsCallback(optionsData)
       });
-
-      return {
-        host: origin + (options.servletContext || ''),
-        user: options.user,
-        password: options.password,
-        url: function(url) {
-            return origin + (options.servletContext || '') + url;
-        }
-      };
 }
 
 function getWithAuth(url, callback) {
-  var options = getOptions();
-
-  $.ajax({
-    url: options.url(url),
-    method: 'GET',
-    beforeSend: function(xhr) {
-        xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
-      }
-    }).always(function(data) {
-      if (callback) {
-        callback(data);
-      }
-    });
-  }
+  getOptions(function (options) {
+      $.ajax({
+          url: options.url(url),
+          method: 'GET',
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+          }
+      }).always(function(data) {
+          if (callback) {
+              callback(data);
+          }
+      });
+  });
+}
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
@@ -184,7 +184,6 @@ function getWithAuth(url, callback) {
 function getTracerConfig(callback) {
   var BUNDLE_URL = '/system/console/bundles/org.apache.sling.tracer.json',
       CONFIG_URL = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer.json',
-      options = getOptions(),
       status = { };
 
   console.log('Requesting Sling Tracer Bundle information @ ' + BUNDLE_URL);
@@ -224,8 +223,7 @@ function getTracerConfig(callback) {
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
 function getSlingTracerJSON(request, sender, callback) {
-  var options = getOptions(),
-      url = '/system/console/tracer/' + request.requestId + '.json';
+  var url = '/system/console/tracer/' + request.requestId + '.json';
       // Servlet context can be supported by adding to the options.host configuration
 
   console.log('Requesting Sling Tracer information @ ' + url);
