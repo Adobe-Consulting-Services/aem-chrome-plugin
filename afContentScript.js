@@ -17,13 +17,14 @@
  * limitations under the License.
  * #L%
  */
+(function() {
+  var s = document.createElement('script');
+  s.src = chrome.extension.getURL('afCustomScript.js');
+  (document.head || document.documentElement).appendChild(s);
 
-var s = document.createElement('script');
-s.src = chrome.extension.getURL('afCustomScript.js');
-(document.head || document.documentElement).appendChild(s);
-
-window.addEventListener('af-editor-loaded.afPlugin', function (e) {
-    chrome.runtime.sendMessage({url: window.location.href , action: "af-editor-loaded"}, function(response) {
-        console.log(response);
-    });
-});
+  window.addEventListener('af-editor-loaded.afPlugin', function (e) {
+      chrome.runtime.sendMessage({url: window.location.href , action: "af-editor-loaded"}, function(response) {
+          console.log(response);
+      });
+  });
+})();
