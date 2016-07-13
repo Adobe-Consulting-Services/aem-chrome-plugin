@@ -531,17 +531,14 @@
 
                                       <ul class="af-log-levels">
                                         <li><label>Enable:</label><input type="checkbox" id="enableLog" name="enableLogging" value="logging"/></li>
-                                        <li><label>XFA:</label><select id="logCategory-xfa" name="xfaCategory"></select></li>
+                                        <li><label>Model:</label><select id="logCategory-xfa" name="xfaCategory"></select></li>
                                         <li><label>View:</label><select id="logCategory-xfaView" name="xfaViewCategory"></select></li>
                                         <li><label>Performance:</label><select id="logCategory-xfaPerf" name="xfaPerfCategory"></select></li>
                                         <li><label>AF:</label><select id="logCategory-aF" name="adaptiveFormCategory"></select></li>
                                       </ul>
 
                                       <p>
-                                          This Logger configuration enables logging for a form.
-                                      </p>
-                                      <p>
-                                        The log configuration is made up of the logger category and a corresponding log level.
+                                            The log configuration is made up of logger category and a corresponding log level. The different categories are Model(Scripting engine-related logs), View(Layout engine-related logs), Performance(Performance-related logs) and Adaptive Form.
                                       </p>
                                       <p>
                                         In the log URL, the log configuration query string parameter is defined as follows: <strong>{a level}-{b level}-{c level}-{d level}</strong>
@@ -549,7 +546,7 @@
                                       <p>
                                        For example: to enable a logger to have the following settings...
                                        <br/>
-                                       XFA: INFO, AF: ALL and OFF for other categories, the value of <strong>window.AF_log_config</strong> should be <strong>a4-b0-c0-d7</strong>
+                                            Model: INFO, Adaptive Form: ALL and OFF for other categories, the value of <strong>window.AF_log_config</strong> should be <strong>a4-b0-c0-d7</strong>
                                       </p>
 
                                     </div>
