@@ -1,6 +1,6 @@
 {
   "name": "AEM Chrome Plug-in",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "manifest_version": 2,
   "description": "Devtools panel for AEM development. Includes in-browser Log Tracer and Adaptive Forms development tooling",
   "devtools_page": "devtools.html",
