@@ -34,7 +34,8 @@ angular.module('aem-chrome-plugin-app')
       tracerIds: 'oak-query,oak-writes',
       tracerSets: [],
       servletContext: '',
-      maxHistory: 200
+      maxHistory: 200,
+      origin: 'http://localhost:4502'
   };
 
   $scope.options.tracerSets = $scope.options.tracerSets || [];
@@ -49,8 +50,13 @@ angular.module('aem-chrome-plugin-app')
 
   function init() {
     if (chrome && chrome.runtime) {
+      $scope.options.origin = $scope.options.origin || 'http://localhost:4502';
+
       chrome.runtime.sendMessage({
-          action: 'getTracerConfig'
+          action: 'getTracerConfig',
+          overrides: {
+            origin: $scope.options.origin || 'http://localhost:4502'
+          }
         },
         function(data) {
           $timeout(function() {

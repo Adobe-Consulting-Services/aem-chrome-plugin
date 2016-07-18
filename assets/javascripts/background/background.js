@@ -132,14 +132,14 @@ chrome.runtime.onMessage.addListener(
       // sync the urlFilter from AEMPanel to background.js
       urlFilter = (message.urlFilter || '').trim();
     } else if (message.action === 'getTracerConfig') {
-      getTracerConfig(callback);
+      getTracerConfig(callback, message.overrides);
       return true;
     } else if(message.action === "af-editor-loaded"){
         sendToDevTools(message);
     }
   });
 
-function getOptions(optionsCallback) {
+function getOptions(optionsCallback, overrides) {
   var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
       origin = 'http://localhost:4502';
 
@@ -150,6 +150,14 @@ function getOptions(optionsCallback) {
               url = new URL(tabs[0].url);
               origin = url.origin;
           }
+
+          // handle any overrides if they exist
+          if (overrides) {
+            if (overrides.origin) {
+              origin = overrides.origin;
+            }
+          }
+
           var optionsData = {
               host: origin + (options.servletContext || ''),
               user: options.user,
@@ -158,11 +166,11 @@ function getOptions(optionsCallback) {
                   return origin + (options.servletContext || '') + url;
               }
           };
-          optionsCallback(optionsData)
+          optionsCallback(optionsData);
       });
 }
 
-function getWithAuth(url, callback) {
+function getWithAuth(url, callback, overrides) {
   getOptions(function (options) {
       $.ajax({
           url: options.url(url),
@@ -175,13 +183,13 @@ function getWithAuth(url, callback) {
               callback(data);
           }
       });
-  });
+  }, overrides);
 }
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
-function getTracerConfig(callback) {
+function getTracerConfig(callback, overrides) {
   var BUNDLE_URL = '/system/console/bundles/org.apache.sling.tracer.json',
       CONFIG_URL = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer.json',
       status = { };
@@ -207,14 +215,14 @@ function getTracerConfig(callback) {
           }
 
           callback(status);
-        });
+        }, overrides);
       } else {
         callback(status);
       }
     } else {
       callback(status);
     }
-  });
+  }, overrides);
 }
 
 

@@ -106,53 +106,64 @@
               ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">Add TracerSet</button>
         </form>
 
-        <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid"
-             id="osgi-status"
-             class="osgi-status">
+        <hr/>
+
+
+        <div id="osgi-status"
+             class="form-options osgi-status">
           <h2>Apache Sling Log Tracer OSGi Status</h2>
 
-          <h4>
-            <a target="_blank" href="{{ options.host }}/system/console/bundles">
-            Apache Sling Log Tracer OSGi Bundle</a>
-          </h4>
-          <ul>
-            <li class="{{ osgi.bundle.active.valid ? '' : 'error' }}">
-                <label>Active</label>:
-                <span>{{ osgi.bundle.active.value }}</span>
-            </li>
+          <label class="text">
+            Test Configuration for AEM Host
+            <br/>
+            <input type="text" ng-model="options.origin"/>
+          </label>
 
-            <li class="{{ osgi.bundle.version.valid ? '' : 'error' }}">
-                <label>Version</label>:
-                <span>{{ osgi.bundle.version.value }}</span>
-            </li>
-          </ul>
+          <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid">
 
-          <div ng-show="osgi.bundle.active.valid && osgi.bundle.version.valid">
             <h4>
-              <a target="_blank" href="{{ options.host }}/system/console/configMgr/configMgr/org.apache.sling.tracer.internal.LogTracer">
-              Apache Sling Log Tracer OSGi Component Configuration</a>
+              <a target="_blank" href="{{ options.origin }}/system/console/bundles">
+              Apache Sling Log Tracer OSGi Bundle</a>
             </h4>
-
             <ul>
-              <li class="{{ osgi.config.enabled.valid ? '' : 'error' }}">
-                  <label>Enabled</label>:
-                  <span>{{ osgi.config.enabled.value || false }}</span>
+              <li class="{{ osgi.bundle.active.valid ? '' : 'error' }}">
+                  <label>Active</label>:
+                  <span>{{ osgi.bundle.active.value }}</span>
               </li>
-              <li class="{{ osgi.config.servletEnabled.valid ? '' : 'error' }}">
-                  <label>Servlet Enabled</label>:
-                  <span>{{ osgi.config.servletEnabled.value || false }}</span>
-              </li>
-              <li class="{{ osgi.config.tracerSets.valid ? '' : 'error' }}">
-                  <label>Tracer Sets</label>:
-                  <ul ng-show="osgi.config.tracerSets.valid"
-                      ng-repeat="tracerSet in osgi.config.tracerSets.value">
-                    <li>{{ tracerSet }}</li>
-                  </ul>
-                  <span ng-hide="osgi.config.tracerSets.valid">
-                    No Sling Tracer sets configured.
-                  </span>
+
+              <li class="{{ osgi.bundle.version.valid ? '' : 'error' }}">
+                  <label>Version</label>:
+                  <span>{{ osgi.bundle.version.value }}</span>
               </li>
             </ul>
+
+            <div ng-show="osgi.bundle.active.valid && osgi.bundle.version.valid">
+              <h4>
+                <a target="_blank" href="{{ options.origin }}/system/console/configMgr/configMgr/org.apache.sling.tracer.internal.LogTracer">
+                Apache Sling Log Tracer OSGi Component Configuration</a>
+              </h4>
+
+              <ul>
+                <li class="{{ osgi.config.enabled.valid ? '' : 'error' }}">
+                    <label>Enabled</label>:
+                    <span>{{ osgi.config.enabled.value || false }}</span>
+                </li>
+                <li class="{{ osgi.config.servletEnabled.valid ? '' : 'error' }}">
+                    <label>Servlet Enabled</label>:
+                    <span>{{ osgi.config.servletEnabled.value || false }}</span>
+                </li>
+                <li class="{{ osgi.config.tracerSets.valid ? '' : 'error' }}">
+                    <label>Tracer Sets</label>:
+                    <ul ng-show="osgi.config.tracerSets.valid"
+                        ng-repeat="tracerSet in osgi.config.tracerSets.value">
+                      <li>{{ tracerSet }}</li>
+                    </ul>
+                    <span ng-hide="osgi.config.tracerSets.valid">
+                      No Sling Tracer sets configured.
+                    </span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
