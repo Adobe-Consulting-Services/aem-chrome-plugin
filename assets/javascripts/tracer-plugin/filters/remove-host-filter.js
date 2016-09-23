@@ -23,7 +23,7 @@ angular.module('aem-chrome-plugin-app')
 .filter('removeHost', function() {
   return function(input) {
     if (input) {
-      return input.replace(/^[\w]+:\/\/[\w:]+/, "");
+      return input.replace(/^[\w]+:\/\/[^\/]+\//i, "/");
     } else {
       return input;
     }
