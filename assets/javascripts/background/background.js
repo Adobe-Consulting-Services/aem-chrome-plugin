@@ -272,11 +272,16 @@ var injectHeaderListener = function (details) {
       }
     });
 
-    if (tracerSets) {
+    if (tracerSets && tracerSets.length > 0) {
       details.requestHeaders.push({
         name: 'Sling-Tracer-Config',
         value: tracerSets.join(',')
       });
+    } else {
+        details.requestHeaders.push({
+            name: 'Sling-Tracer-Config',
+            value: 'sling-tracer-configs-not-set;caller=true'
+        });
     }
   }
 
