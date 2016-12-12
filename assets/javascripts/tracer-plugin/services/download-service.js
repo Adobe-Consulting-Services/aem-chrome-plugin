@@ -40,7 +40,7 @@ angular.module('aem-chrome-plugin-app')
       type = type || 'text/json';
 
       if (typeof data === 'object' && type === 'text/plain') {
-        // if data is a JS object, but requesting as text (requstProgressLogs)
+        // if data is a JS object, but requesting as text (requestProgressLogs)
         // turn into text
         data = jsonToText(data);
       }
@@ -62,7 +62,6 @@ angular.module('aem-chrome-plugin-app')
 
       // Name the file to download
       filename = filename ? 'aem-chrome-plugin-' + filename + extension : 'aem-chrome-plugin' + extension;
-
 
       blob = new Blob([data], {type: type});
       e = document.createEvent('MouseEvents');

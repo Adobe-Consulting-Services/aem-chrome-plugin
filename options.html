@@ -40,16 +40,16 @@
             class="error-instructions">
             <!-- Bundle is not installed -->
             <div ng-show="!osgi.bundle.exists.valid || !osgi.bundle.version.valid">
-              <p>AEM Chrome Plug-in requires AEM 6.1+ and Sling Apache Log Tracer version 1.0.0+</p>
+              <p>AEM Chrome Plug-in requires AEM 6.0+ and Sling Apache Log Tracer version 1.0.2+</p>
               <p>Please download the latest Apache Sling Log Tracer Bundle and install on the target AEM instance and refresh this page.</p>
               <ul>
-                <li><a class="button" target="sling-download" href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22org.apache.sling.tracer%22">Download the Apache Sling Log Tracer 1.0.0+ Bundle</a></li>
-                <li><a class="button" target="felix-bundles" href="{{ options.host }}/system/console/bundles">Install the Apache Sling Log Tracer Bundle</a></li>
+                <li><a class="button" target="sling-download" href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22org.apache.sling.tracer%22">Download the Apache Sling Log Tracer 1.0.2+ Bundle</a></li>
+                <li><a class="button" target="felix-bundles" href="{{ options.origin }}/system/console/bundles">Install the Apache Sling Log Tracer Bundle</a></li>
               </ul>
             </div>
 
             <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid">
-                <p>The installed Apache Sling Log Tracer bundle is misconfigured.</p>
+                <p>The installed Apache Sling Log Tracer bundle is mis-configured.</p>
                 <p>Please review and correct the configuration.</p>
                 <a class="button" href="#osgi-status">Review the Current Configuration</a>
             </div>
@@ -72,38 +72,6 @@
             <br/>
             <input type="text" ng-model="options.password"/>
           </label>
-          <label class="text">
-            Server Sling Tracer Ids <em>(comma delimited)</em>
-            <br/>
-            <input type="text" ng-model="options.tracerIds"/>
-          </label>
-          <label class="text">
-            Ad-hoc Tracer Sets
-            <br/>
-          </label>
-
-          <div class="tracer-set"
-              ng-repeat="set in options.tracerSets">
-              <span class="tracer-set--enabled--wrapper">
-              <input class="tracer-set--enabled"
-                    type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
-              </span>
-              <input class="tracer-set--package" type="text" ng-model="set.package" placeholder="Package"/>
-              <select class="tracer-set--level" ng-model="set.level">
-                  <option value="TRACE">TRACE</option>
-                  <option value="DEBUG">DEBUG</option>
-                  <option value="INFO">INFO</option>
-                  <option value="WARN">WARN</option>
-                  <option value="ERROR">ERROR</option>
-              </select>
-              <button
-                class="tracer-set--remove"
-                ng-show="options.tracerSets.length > 1"
-                ng-click="options.tracerSets.splice($index, 1)">Remove</button>
-          </div>
-          <button
-              class="tracer-set--add"
-              ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">Add TracerSet</button>
         </form>
 
         <hr/>

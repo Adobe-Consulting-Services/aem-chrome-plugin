@@ -263,8 +263,12 @@ var injectHeaderListener = function (details) {
 
     var tracerSets = [];
     $.each(options.tracerSets, function(index, value) {
+        var tracerSetConfig;
       if (value.enabled && value.package) {
-        tracerSets.push(value.package + ';level=' + value.level || 'DEBUG');
+          tracerSetConfig = value.package;
+          tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
+          tracerSetConfig = tracerSetConfig + ';caller=true';
+          tracerSets.push(tracerSetConfig);
       }
     });
 

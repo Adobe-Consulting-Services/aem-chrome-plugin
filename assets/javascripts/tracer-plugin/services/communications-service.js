@@ -48,7 +48,7 @@ angular.module('aem-chrome-plugin-app')
                 if (data) {
                   scope.processRequest(request, data);
                 }
-                // Better added to a directive
+                // TODO: Better added to a directive
                 $('.data-container').scrollTop(100000000);
               }
             );

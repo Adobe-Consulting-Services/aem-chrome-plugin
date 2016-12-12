@@ -1,0 +1,83 @@
+/*
+ * #%L
+ * AEM Chrome Plug-in
+ * %%
+ * Copyright (C) 2016 Adobe
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+.logger-names--list {
+    list-style: none;
+    margin: .5rem 0;
+    padding: 0;
+}
+
+.logger-names--list li {
+    list-style: none;
+    margin: .5rem;
+}
+
+#tracerPlugin input[type="button"],
+#tracerPlugin button {
+    border: solid 1px #ccc;
+    background-color: white;
+    border-radius: 3px;
+}
+
+#tracerPlugin input[type="button"]:active,
+#tracerPlugin button:active {
+    background-color: #d9d9d9;
+}
+
+
+#tracerPlugin .tab-filter-wrapper input {
+    height: 1.3rem;
+    padding: 0 .25rem;
+    float: left;
+    width: 45%;
+}
+
+#tracerPlugin .download-button {
+    margin-left: 0;
+    float: left;
+    margin-right: 1rem;
+}
+
+
+
+.control-bar {
+    background: rgba(0, 0, 0, 0.05);
+    height: 31px;
+    border-bottom: solid 1px #ccc;
+    padding: 4px 10px;
+}
+
+.control-bar .control-url-filter input[type=text],
+.control-bar .control-search-filter input[type=text] {
+    width: 120px;
+    padding: 3px 5px;
+}
+
+.control-bar .control-max-requests input[type=number] {
+    width: 50px;
+    padding: 3px 5px;
+}
+
+.control-bar .control-url-filter,
+.control-bar .control-search-filter,
+.control-bar .control-max-requests {
+    margin-right: 8px;
+}
+

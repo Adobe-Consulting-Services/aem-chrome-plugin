@@ -25,30 +25,6 @@ ul {
   -webkit-touch-callout: none;
 }
 
-.control-bar {
-  background: rgba(0, 0, 0, 0.05);
-  height: 31px;
-  border-bottom: solid 1px #ccc;
-  padding: 4px 10px;
-}
-
-.control-bar .control-url-filter input[type=text],
-.control-bar .control-search-filter input[type=text] {
-  width: 95px;
-  padding: 3px 5px;
-}
-
-.control-bar .control-max-requests input[type=number] {
-  width: 50px;
-  padding: 3px 5px;
-}
-
-.control-bar .control-url-filter,
-.control-bar .control-search-filter,
-.control-bar .control-max-requests {
-  margin-right: 8px;
-}
-
 .data-grid table {
   table-layout: fixed;
   border-spacing: 0;
@@ -474,14 +450,7 @@ table#breakdown td.meter-col {
   border-bottom: dotted 1px #ccc;
 }
 
-.tab-filter-wrapper input {
-  width: 600px;
-  float: left;
-}
 
-.download-button {
-  margin-left: 1rem;
-}
 
 .tab-filter-container {
   padding-top: 40px;

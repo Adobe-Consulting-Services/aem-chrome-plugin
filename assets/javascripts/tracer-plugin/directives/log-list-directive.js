@@ -18,6 +18,7 @@
  * #L%
  */
 
+/* This directive 'manually' constructs the HTML for performance reasons; ng has problems managing large lists. */
 angular.module('aem-chrome-plugin-app')
 .directive('aemChromePluginLogList', function() {
     return {

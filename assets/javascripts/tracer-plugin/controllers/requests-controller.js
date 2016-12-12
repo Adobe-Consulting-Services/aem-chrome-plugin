@@ -20,126 +20,153 @@
 
 angular.module('aem-chrome-plugin-app')
 /** requests Controller **/
-.controller('RequestsCtrl', [
-    '$scope',
-    '$filter',
-    '$timeout',
-    'removeHostFilter',
-    'CommunicationsService',
-    'TracerStatusService',
-    'DownloadService',
-    function( $scope,
-              $filter,
-              $timeout,
-              removeHostFilter,
-              communications,
-              tracerStatus,
-              download) {
+    .controller('RequestsCtrl', [
+        '$scope',
+        '$filter',
+        '$timeout',
+        'removeHostFilter',
+        'CommunicationsService',
+        'TracerStatusService',
+        'DownloadService',
+        'TracerSetService',
+        function ($scope,
+                  $filter,
+                  $timeout,
+                  removeHostFilter,
+                  communications,
+                  tracerStatus,
+                  download,
+                  tracerSet) {
 
-  var MAX_REQUESTS = 25;
+            var MAX_REQUESTS = 100;
 
-  // Data
-  $scope.controls = {
-    urlFilter: '.html',
-    searchFilter: '',
-    maxRequests: MAX_REQUESTS
-  };
+            // Data
+            $scope.controls = {
+                urlFilter: '.html|.json',
+                searchFilter: '',
+                maxRequests: MAX_REQUESTS
+            };
 
-  $scope.activeKey = null;
-  $scope.activeRequest = {};
-  $scope.activeTracerData  = {};
-  $scope.requestKeys = [];
-  $scope.requests = {};
-  $scope.osgi = {};
-  $scope.showMiniOptions = false;
+            $scope.activeKey = null;
+            $scope.activeRequest = {};
+            $scope.activeTracerData = {};
+            $scope.requestKeys = [];
+            $scope.requests = {};
+            $scope.osgi = {};
+            $scope.showMiniOptions = false;
 
-  $scope.$watch('controls.urlFilter', function(value) {
-    if (chrome && chrome.runtime) {
-      chrome.runtime.sendMessage({ action: 'updateURLFilter', urlFilter: value }, function(response) {});
-    }
-	});
+            $scope.$watch('controls.urlFilter', function (value) {
+                if (chrome && chrome.runtime) {
+                    chrome.runtime.sendMessage({action: 'updateURLFilter', urlFilter: value}, function (response) {
+                    });
+                }
+            });
 
-  $scope.init = function() {
-    if (chrome && chrome.runtime) {
-      chrome.runtime.sendMessage({ action: 'updateURLFilter', urlFilter: $scope.controls.urlFilter }, function(response) {});
-      chrome.runtime.sendMessage({ action: 'getTracerConfig' }, function(data) { $scope.osgi = tracerStatus.setStatus(data); $timeout(0); });
-    }
+            $scope.init = function () {
+                if (chrome && chrome.runtime) {
+                    chrome.runtime.sendMessage({
+                        action: 'updateURLFilter',
+                        urlFilter: $scope.controls.urlFilter
+                    }, function (response) {
+                    });
+                    chrome.runtime.sendMessage({action: 'getTracerConfig'}, function (data) {
+                        $scope.osgi = tracerStatus.setStatus(data);
+                        $timeout(0);
+                    });
+                }
 
-    // Start listening for Requests
-    communications.listen($scope);
-  };
+                // Start listening for Requests
+                communications.listen($scope);
+            };
 
-  $scope.requests = function() {
-    return $scope.requestKeys.map(function(key) {
-      return $scope.requests[key];
-    });
-  };
+            $scope.requests = function () {
+                return $scope.requestKeys.map(function (key) {
+                    return $scope.requests[key];
+                });
+            };
 
-  $scope.clear = function() {
-    var key;
-    while ($scope.requestKeys.length > 0) {
-        key = $scope.requestKeys.pop();
-        delete $scope.requests[key];
-    }
-  };
+            $scope.clear = function () {
+                var key;
+                while ($scope.requestKeys.length > 0) {
+                    key = $scope.requestKeys.pop();
+                    delete $scope.requests[key];
+                }
+            };
 
-  $scope.setActive = function(requestId) {
-    $scope.activeKey = requestId;
-    $scope.activeRequest = $scope.activeKey ? $scope.requests[$scope.activeKey] : null;
-    $scope.activeTracerData = $scope.activeRequest.tracerData || null;
-  };
+            $scope.setActive = function (requestId) {
+                $scope.activeKey = requestId;
+                $scope.activeRequest = $scope.activeKey ? $scope.requests[$scope.activeKey] : null;
+                $scope.activeTracerData = $scope.activeRequest.tracerData || null;
+            };
 
-  $scope.notEmpty = function(col) {
-    if (!col) {
-      return false;
-    } else {
-      return col.length > 0;
-    }
-  };
+            $scope.notEmpty = function (col) {
+                if (!col) {
+                    return false;
+                } else {
+                    return col.length > 0;
+                }
+            };
 
-  $scope.getMaxRequests = function() {
-      if (!$scope.controls.maxRequests || $scope.controls.maxRequests < 0) {
-        return MAX_REQUESTS;
-      } else {
-        return $scope.controls.maxRequests;
-      }
-  };
+            $scope.getMaxRequests = function () {
+                if (!$scope.controls.maxRequests || $scope.controls.maxRequests < 0) {
+                    return MAX_REQUESTS;
+                } else {
+                    return $scope.controls.maxRequests;
+                }
+            };
 
-  $scope.getClass = function(requestId) {
-    return (requestId === $scope.activeKey) ? 'selected' : '';
-  };
+            $scope.getClass = function (requestId) {
+                return (requestId === $scope.activeKey) ? 'selected' : '';
+            };
 
-  $scope.processRequest = function(request, data) {
-    request.tracerData = data;
+            $scope.processRequest = function (request, data) {
+                request.tracerData = data;
 
-    request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
-    request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
+                request.tracerData.loggerNames = tracerSet.convert(request.tracerData.loggerNames);
+                request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
+                request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
 
-    $scope.requestKeys.push(request.key);
-    $scope.requests[request.key] = request;
+                $scope.requestKeys.push(request.key);
+                $scope.requests[request.key] = request;
 
-    $scope.removeRequests($scope.getMaxRequests());
+                $scope.removeRequests($scope.getMaxRequests());
 
-    $timeout(0);
-  };
+                $timeout(0);
+            };
 
-  $scope.removeRequests = function(max) {
-    var key;
-    while ($scope.requestKeys.length > max) {
-        // Remove from front of array
-        key = $scope.requestKeys.shift();
-        delete $scope.requests[key];
-    }
-  };
+            $scope.removeRequests = function (max) {
+                var key;
+                while ($scope.requestKeys.length > max) {
+                    // Remove from front of array
+                    key = $scope.requestKeys.shift();
+                    delete $scope.requests[key];
+                }
+            };
 
-  $scope.reload = function() {
-    chrome.devtools.inspectedWindow.reload({
-      ignoreCache: true,
-    });
-  };
+            $scope.reload = function () {
+                chrome.devtools.inspectedWindow.reload({
+                    ignoreCache: true
+                });
+            };
 
-  $scope.download = function(data, name, type) {
-    var url =  $scope.activeRequest.request.method + ' ' + $scope.activeRequest.request.url;
-    download.download(data, name, url, type);
-  };
-}]);
+            $scope.download = function (data, name, type) {
+                var url = $scope.activeRequest.request.method + ' ' + $scope.activeRequest.request.url;
+                download.download(data, name, url, type);
+            };
+
+            $scope.toggleLoggerName = function(requestTracerSet, optionsTracerSets) {
+                if (requestTracerSet && requestTracerSet.package) {
+                    requestTracerSet.enabled = !requestTracerSet.enabled;
+                    tracerSet.syncRequestToOptions(requestTracerSet, optionsTracerSets);
+                }
+            };
+
+            $scope.syncOptionsToRequestLoggerNames = function(optionsTracerSets, requestTracerSets) {
+                return tracerSet.syncOptionsToRequestLoggerNames(optionsTracerSets, requestTracerSets);
+            };
+
+            $scope.syncOptionRemovalToRequests = function(removedTracerSet, requestTracerSets) {
+                tracerSet.syncOptionRemovalToRequests(removedTracerSet, requestTracerSets);
+            };
+
+        }]);

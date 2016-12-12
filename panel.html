@@ -22,6 +22,8 @@
   <head>
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/panel.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/common.css">
+      <link rel="stylesheet" type="text/css" href="assets/stylesheets/tracer-plugin/tracer.css">
+
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afCommon.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afAuthoring.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afRuntime.css">
@@ -60,6 +62,7 @@
     <script src="assets/javascripts/tracer-plugin/services/communications-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/tracer-status-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/download-service.js"></script>
+      <script src="assets/javascripts/tracer-plugin/services/tracer-set-service.js"></script>
 
     <script src="assets/javascripts/tracer-plugin/controllers/requests-controller.js"></script>
     <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
@@ -158,14 +161,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="split-view-contents split-view-contents-details">
+                <div class="split-view-contents split-view-contents-details"
+                     ng-controller="OptionsCtrl">
                     <div id="vdivider"></div>
                     <div id="tabs" class="tabbed-pane">
                         <div id="hdivider"></div>
                         <div class="request-info">
                             <button
                                     class="mini-options--button"
-                                    ng-click="showMiniOptions = !showMiniOptions">...
+                                    ng-click="showMiniOptions = !showMiniOptions">Tracer Sets
                             </button>
 
                             <span ng-hide="activeRequest">
@@ -179,29 +183,10 @@
                             <div id="mini-options" ng-show="showMiniOptions">
 
                                 <button class="mini-options--close"
-                                        ng-click="showMiniOptions = !showMiniOptions">X
+                                        ng-click="showMiniOptions = !showMiniOptions">Close
                                 </button>
 
-                                <div ng-controller="OptionsCtrl">
-                                    <!--
-
-                                    <div class="field-wrapper">
-                                      <label class="text">AEM Host</label>
-                                      <input type="text" ng-model="options.host"/>
-                                    </div>
-
-                                    <div class="field-wrapper">
-                                      <label class="text">Web Console User</label>
-                                      <input type="text" ng-model="options.user"/>
-                                    </div>
-
-                                    <div class="field-wrapper">
-                                      <label class="text">Web Console Password</label>
-                                      <input type="text" ng-model="options.password"/>
-                                    </div>
-
-                                    -->
-
+                                <div>
                                     <div class="field-wrapper">
                                         <label class="text">Server Sling Tracer Ids</label>
                                         <input type="text" ng-model="options.tracerIds"/>
@@ -211,10 +196,10 @@
                                         <label class="text">Ad-hoc Tracer Sets</label>
 
                                         <div class="tracer-set"
-                                             ng-repeat="set in options.tracerSets">
+                                             ng-repeat="set in options.tracerSets track by $index">
                                               <span class="tracer-set--enabled--wrapper">
                                               <input class="tracer-set--enabled"
-             type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+                                                     type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
                                               </span>
                                             <input class="tracer-set--package" type="text" ng-model="set.package"
                                                    placeholder="Package"/>
@@ -228,7 +213,7 @@
                                             <button
                                                     class="tracer-set--remove"
                                                     ng-show="options.tracerSets.length > 1"
-                                                    ng-click="options.tracerSets.splice($index, 1)">Remove
+                                                    ng-click="options.tracerSets.splice($index, 1); syncOptionRemovalToRequests(set, activeTracerData.loggerNames)">Remove
                                             </button>
                                         </div>
 
@@ -263,12 +248,11 @@
                                         <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries
                                             <span ng-show="activeTracerData.queries">({{ activeTracerData.queries.length }})</span></a>
                                     </li>
-                                    <!-- Timing
-                                    <li class="tabbed-pane-header-tab">
-                                      <a href="#tab-timing" class="tabbed-pane-header-tab-title">Timing
-                                        <span ng-show="activeTracerData.time > 0">({{ activeTracerData.time || 0 }}ms)</a></span>
+                                    <!-- Logger Names -->
+                                    <li class="tabbed-pane-header-tab"
+                                        ng-show="activeTracerData.loggerNames.length > 0">
+                                      <a href="#tab-logger-names" class="tabbed-pane-header-tab-title">Logger Names</a></span>
                                     </li>
-                                    -->
                                 </ul>
                             </div>
                         </div>
@@ -278,16 +262,16 @@
                             <div id="tab-log">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
+                                        <button
+                                                class="download-button"
+                                                ng-show="notEmpty(activeTracerData.logs)"
+                                                ng-click="download(activeTracerData.logs, 'logs')">Download</button>
+
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Filter Logs"
+                                               placeholder="Search Logs"
                                                ng-model="controls.logFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
-
-                                         <button
-                                            class="download-button"
-                                            ng-show="notEmpty(activeTracerData.logs)"
-                                            ng-click="download(activeTracerData.logs, 'logs')">Download</button>
                                     </div>
 
                                     <div aem-chrome-plugin-log-list
@@ -305,17 +289,17 @@
                             <div id="tab-request-progress">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
+
+                                        <button
+                                                class="download-button"
+                                                ng-show="notEmpty(activeTracerData.requestProgressLogs)"
+                                                ng-click="download(activeTracerData.requestProgressLogs, 'request-progress', 'text/plain')">Download</button>
+
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Filter Request Progress"
+                                               placeholder="Search Request Progress"
                                                ng-model="controls.requestProgressFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
-
-                                         <button
-                                            class="download-button"
-                                            ng-show="notEmpty(activeTracerData.requestProgressLogs)"
-                                            ng-click="download(activeTracerData.requestProgressLogs, 'request-progress', 'text/plain')">Download</button>
-
                                     </div>
 
                                     <div aem-chrome-plugin-log-list
@@ -334,16 +318,16 @@
                             <div id="tab-queries">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
+                                        <button
+                                                class="download-button"
+                                                ng-show="notEmpty(activeTracerData.queries)"
+                                                ng-click="download(activeTracerData.queries, 'queries')">Download</button>
+
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Filter Queries"
+                                               placeholder="Search Queries"
                                                ng-model="controls.queryFilter"
                                                ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
-
-                                         <button
-                                            class="download-button"
-                                            ng-show="notEmpty(activeTracerData.queries)"
-                                            ng-click="download(activeTracerData.queries, 'queries')">Download</button>
                                     </div>
 
                                     <div aem-chrome-plugin-log-list
@@ -357,21 +341,20 @@
                                 </div>
                             </div>
 
-                            <!-- Timing Tab Panel
-                            <div id="tab-timing">
-                              <table id="timing">
-                                <tr>
-                                  <td>
-                                    <ul class="params-list">
-                                      <li>Server time: {{ (activeTracerData.time || 0) | number: 0 }}ms</li>
-                                      <li>Network time: {{ activeRequest.time - (activeTracerData.time || 0) | number: 0 }}ms</li>
-                                      <li>Total time: {{ activeRequest.time | number: 0 }}ms</li>
-                                    </ul>
-                                    </td>
-                                </tr>
-                              </table>
-                            </div>
-                            -->
+                            <!-- Caller Tab Panel -->
+                              <div id="tab-logger-names">
+                                  <h4>Request's call stack. <em>Checkboxes add/remove packages from Tracer Sets.</em></h4>
+
+                                <ul class="logger-names--list">
+                                    <li ng-repeat="loggerName in syncOptionsToRequestLoggerNames(options.tracerSets, activeTracerData.loggerNames) track by $index">
+                                        <input type="checkbox"
+                                               ng-click="toggleLoggerName(loggerName, options.tracerSets)"
+                                               ng-checked="loggerName.enabled"/>
+                                        <label ng-click="toggleLoggerName(loggerName, options.tracerSets)">{{ loggerName.package }}</label>
+                                    </li>
+                                </ul>
+
+                              </div>
                         </div>
                     </div>
                 </div>

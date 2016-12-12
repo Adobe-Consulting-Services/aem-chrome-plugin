@@ -20,7 +20,7 @@
 
 (function(){
     var s = document.createElement('script');
-    s.src = chrome.extension.getURL('afCustomScript.js');
+    s.src = chrome.extension.getURL('aem-chrome-plugin--adaptive-form--custom-script.js');
     (document.head || document.documentElement).appendChild(s);
 
     window.addEventListener('af-editor-loaded.afPlugin', function () {
