@@ -37,7 +37,6 @@ angular.module('aem-chrome-plugin-app')
       chrome.devtools.network.onRequestFinished.addListener(function(chromeRequest) {
         var request = requests.create(chromeRequest);
         if (request && request.key) {
-
           if (chrome && chrome.runtime) {
             console.log("Requesting Sling Tracer JSON for: " + chromeRequest.request.url);
             chrome.runtime.sendMessage({

@@ -122,7 +122,7 @@ angular.module('aem-chrome-plugin-app')
                     var html = '',
                         haystack = '';
 
-                    if (entry.caller) {
+                    if (entry.caller && entry.caller.length > 0) {
                         html += '<p><strong>CALLER: ' + entry.caller + '</strong></p>';
                         haystack += entry.caller + ' ';
                     }
@@ -139,17 +139,22 @@ angular.module('aem-chrome-plugin-app')
 
                 function logsTemplate(entry) {
                     var haystack = entry.level + ' ' + entry.logger + ' ' + entry.message,
-                        html = '<li class="tracer-log-list--entry"><p>';
+                        html = '<li class="tracer-log-list--entry">';
 
-                    html += '<strong>' + entry.level + ' ' + entry.logger + '</strong></p>';
+                    html += '<p><strong>' + entry.level + ' ' + entry.logger + '</strong></p>';
 
                     html += '<p>';
-                    html += '<button class="tracer-log-list--entry--caller-button">Show Caller</button> ';
-                    html += entry.message + '</p>';
+
+                    if (entry.caller && entry.caller.length > 0) {
+                        html += '<button class="tracer-log-list--entry--caller-button">Show Caller</button> ';
+                    }
+                    
+                    html += entry.message;
+                    html += '</p>';
 
                     if (entry.caller && entry.caller.length > 0) {
                         html += '<ul class="tracer-log-list--entry--caller">';
-
+                        
                         angular.forEach(entry.caller, function (caller) {
                             html += '<li>' + caller + '</li>';
                         });

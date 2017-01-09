@@ -77,7 +77,7 @@
                 <div class="tabbed-pane-header-contents">
                     <ul class="aem-plugin-tabs tabbed-pane-header-tabs">
                         <li class="tabbed-pane-header-tab">
-                            <a href="#tracerPlugin" class="tabbed-pane-header-tab-title">Tracer</a>
+                            <a href="#tracerPlugin" class="tabbed-pane-header-tab-title">Log Tracer</a>
                         </li>
                         <li class="tabbed-pane-header-tab">
                             <a href="#adaptiveFormsPlugin" class="tabbed-pane-header-tab-title">Adaptive Form</a>
@@ -86,24 +86,86 @@
                 </div>
             </div>
             <div>
-
-                <div class="active" id="tracerPlugin">
-
-                <div class="aem-chrome-plugin-requests-controller split-view"
+                <div class="active" id="tracerPlugin"
                      ng-controller="RequestsCtrl"
                      ng-init="init();">
 
-                <div ng-show="!osgi.valid"
+                <div class="aem-chrome-plugin-requests-controller split-view"
+                     ng-controller="OptionsCtrl">
+                    
+<!-- Start Options -->
+<div id="mini-options" ng-show="showMiniOptions">
+
+        <button class="mini-options--close"
+                ng-click="showMiniOptions = false">Close
+        </button>
+
+        <div>
+            <h4>Provided Tracer Sets</h4>
+            <div class="field-wrapper">
+                <div class="tracer-set"
+                     ng-repeat="set in options.providedTracerSets track by $index">
+                    <span class="tracer-set--enabled--wrapper">
+                        <input class="tracer-set--enabled"
+                             type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+                    </span>
+                    <input class="tracer-set--package" type="text" ng-model="set.package" readonly />
+                    
+            <select class="tracer-set--level" ng-model="set.level">
+                        <option value="TRACE">TRACE</option>
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                </div>               
+            </div>                
+                
+                
+            <h4>Ad-Hoc Tracer Sets</h4>
+            <div class="field-wrapper">
+                <div class="tracer-set"
+                     ng-repeat="set in options.tracerSets track by $index">
+                    <span class="tracer-set--enabled--wrapper">
+                        <input class="tracer-set--enabled"
+                             type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+                    </span>
+                    <input class="tracer-set--package" type="text" ng-model="set.package" placeholder="Package"/>
+                    <select class="tracer-set--level" ng-model="set.level">
+                        <option value="TRACE">TRACE</option>
+                        <option value="DEBUG">DEBUG</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>
+                    <button
+                            class="tracer-set--remove"
+                            ng-click="options.tracerSets.splice($index, 1); 
+                                      syncOptionRemovalToRequests(set, activeTracerData.loggerNames)">Remove
+                    </button>
+                </div>
+            </div>
+            <button class="tracer-set--add"
+                    ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">
+                Add TracerSet
+            </button>               
+        </div>
+    </div>
+<!-- End Options -->                    
+                    
+                <div ng-show="!ready"
                      class="hide-onload error-overlay">
                     <div class="error-message">
                         <h1>Attention!</h1>
 
-                        <p>A valid Apache Sling Log Tracer cannot be found on the AEM instance.</p>
+                        <p>AEM Chrome Plug-in could not establish a connection to Sling Log Tracer.</p>
 
-                        <p>Please review and correct any settings in the AEM Chrome Plug-in options.</p>
+                        <p>Please follow the setup instructions at:</p>
 
                         <ul style="margin-left: .5rem;">
-                            <li><strong>Chrome > Window > Extensions > AEM Chrome Plug-in > Options</strong></li>
+                            <li><strong>
+                                <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>                                
+                                </strong></li>
                         </ul>
                     </div>
                 </div>
@@ -163,8 +225,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="split-view-contents split-view-contents-details"
-                     ng-controller="OptionsCtrl">
+                <div class="split-view-contents split-view-contents-details">
                     <div id="vdivider"></div>
                     <div id="tabs" class="tabbed-pane">
                         <div id="hdivider"></div>
@@ -180,57 +241,6 @@
                             <span ng-show="activeRequest">
                               {{ activeRequest.request.method }} {{ activeRequest.request.url | removeHost }}
                             </span>
-
-                            <!-- Mini Options -->
-                            <div id="mini-options" ng-show="showMiniOptions">
-
-                                <button class="mini-options--close"
-                                        ng-click="showMiniOptions = !showMiniOptions">Close
-                                </button>
-
-                                <div>
-                                    <div class="field-wrapper">
-                                        <label class="text">Server Sling Tracer Ids</label>
-                                        <input type="text" ng-model="options.tracerIds"/>
-                                    </div>
-
-                                    <div class="field-wrapper">
-                                        <label class="text">Ad-hoc Tracer Sets</label>
-
-                                        <div class="tracer-set"
-                                             ng-repeat="set in options.tracerSets track by $index">
-                                              <span class="tracer-set--enabled--wrapper">
-                                              <input class="tracer-set--enabled"
-                                                     type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
-                                              </span>
-                                            <input class="tracer-set--package" type="text" ng-model="set.package"
-                                                   placeholder="Package"/>
-                                            <select class="tracer-set--level" ng-model="set.level">
-                                                <option value="TRACE">TRACE</option>
-                                                <option value="DEBUG">DEBUG</option>
-                                                <option value="INFO">INFO</option>
-                                                <option value="WARN">WARN</option>
-                                                <option value="ERROR">ERROR</option>
-                                            </select>
-                                            <button
-                                                    class="tracer-set--remove"
-                                                    ng-show="options.tracerSets.length > 1"
-                                                    ng-click="options.tracerSets.splice($index, 1); syncOptionRemovalToRequests(set, activeTracerData.loggerNames)">Remove
-                                            </button>
-                                        </div>
-
-                                        <button
-                                                class="tracer-set--add"
-                                                ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">
-                                            Add TracerSet
-                                        </button>
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- End Options -->
-
                         </div>
                         <div class="tabbed-pane-header">
                             <div class="tabbed-pane-header-contents">
@@ -536,17 +546,12 @@
 
                                     </div>
                                 </div>
-
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
-
   </body>
 </html>

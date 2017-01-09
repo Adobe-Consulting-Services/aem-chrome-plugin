@@ -28,45 +28,42 @@ angular.module('aem-chrome-plugin-app')
                   $timeout,
                   tracerStatus) {
 
-            $scope.osgi = {};
-
             $scope.options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')) || {
                     user: 'admin',
                     password: 'admin',
-                    tracerIds: 'oak-query,oak-writes',
-                    tracerSets: [],
                     servletContext: '',
-                    maxHistory: 200,
-                    origin: 'http://localhost:4502'
-                };
-
-            $scope.options.tracerSets = $scope.options.tracerSets || [];
-
-            $scope.$watch('options', function (value) {
-                value.tracerSets = value.tracerSets || [];
-                localStorage.setItem('aem-chrome-plugin.options', JSON.stringify(value));
-                $timeout(function () {
-                    init();
-                }, 250);
-            }, true);
-
-
-            function init() {
-                if (chrome && chrome.runtime) {
-                    $scope.options.origin = $scope.options.origin || 'http://localhost:4502';
-
-                    chrome.runtime.sendMessage({
-                            action: 'getTracerConfig',
-                            overrides: {
-                                origin: $scope.options.origin || 'http://localhost:4502'
-                            }
-                        },
-                        function (data) {
-                            $timeout(function () {
-                                $scope.osgi = tracerStatus.setStatus(data);
-                                $scope.initialized = true;
-                            }, 100);
-                        });
-                }
+                    tracerSets: [],
+                    providedTracerSets: []
+            };
+            
+            if (!$scope.options.tracerSets || $scope.options.tracerSets.length === 0) {
+                $scope.options.tracerSets = [];
+            }            
+            
+            if (!$scope.options.providedTracerSets || $scope.options.providedTracerSets.length === 0) {
+                $scope.options.providedTracerSets = [];
+                
+               $scope.options.providedTracerSets.push({
+                    enabled: true,
+                    package: 'org.apache.jackrabbit.oak.query',
+                    level: 'DEBUG'                    
+                });
+                $scope.options.providedTracerSets.push({
+                    enabled: false,
+                    package: 'org.apache.jackrabbit.oak.jcr.operations.writes',
+                    level: 'TRACE'                
+                });                   
             }
+            
+            $scope.$watch('options', function (value) {
+                var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
+                
+                options.user = value.user;
+                options.password = value.password;
+                options.servletContext = value.servletContext;
+                options.tracerSets = value.tracerSets;
+                options.providedTracerSets = value.providedTracerSets;
+                
+                localStorage.setItem('aem-chrome-plugin.options', JSON.stringify(options));
+            }, true);       
         }]);

@@ -69,7 +69,7 @@ angular.module('aem-chrome-plugin-app')
 
                 return requestTracerSets;
             },
-            syncRequestToOptions: function(requestTracerSet, optionsTracerSets) {
+            syncRequestLoggerNamesToOptions: function(requestTracerSet, optionsTracerSets) {
                 var found = false;
                 angular.forEach(optionsTracerSets, function(optionsTracerSet) {
                     if (optionsTracerSet.package === requestTracerSet.package) {
@@ -81,10 +81,14 @@ angular.module('aem-chrome-plugin-app')
 
                 if (!found) {
                     // Add to options
-                    optionsTracerSets.push(requestTracerSet);
+                    optionsTracerSets.push({
+                        enabled: requestTracerSet.enabled,
+                        package: requestTracerSet.package,
+                        level: requestTracerSet.level
+                    });
                 }
             },
-            syncOptionRemovalToRequests: function(removedTracerSet, requestTracerSets) {
+            syncOptionRemovalToRequestLoggerNames: function(removedTracerSet, requestTracerSets) {
                 angular.forEach(requestTracerSets, function(requestTracerSet) {
                     if (removedTracerSet.package === requestTracerSet.package) {
                         requestTracerSet.enabled = false;

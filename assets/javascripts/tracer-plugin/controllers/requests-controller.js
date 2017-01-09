@@ -24,6 +24,7 @@ angular.module('aem-chrome-plugin-app')
         '$scope',
         '$filter',
         '$timeout',
+        '$interval',
         'removeHostFilter',
         'CommunicationsService',
         'TracerStatusService',
@@ -32,6 +33,7 @@ angular.module('aem-chrome-plugin-app')
         function ($scope,
                   $filter,
                   $timeout,
+                  $interval,
                   removeHostFilter,
                   communications,
                   tracerStatus,
@@ -52,9 +54,11 @@ angular.module('aem-chrome-plugin-app')
             $scope.activeTracerData = {};
             $scope.requestKeys = [];
             $scope.requests = {};
-            $scope.osgi = {};
+            $scope.ready = true;
             $scope.showMiniOptions = false;
-
+                 
+            /** Requests **/            
+            
             $scope.$watch('controls.urlFilter', function (value) {
                 if (chrome && chrome.runtime) {
                     chrome.runtime.sendMessage({action: 'updateURLFilter', urlFilter: value}, function (response) {
@@ -67,16 +71,22 @@ angular.module('aem-chrome-plugin-app')
                     chrome.runtime.sendMessage({
                         action: 'updateURLFilter',
                         urlFilter: $scope.controls.urlFilter
-                    }, function (response) {
+                    }, function (response) { 
+                        // Do nothing
                     });
-                    chrome.runtime.sendMessage({action: 'getTracerConfig'}, function (data) {
-                        $scope.osgi = tracerStatus.setStatus(data);
-                        $timeout(0);
-                    });
+                    
+                    $interval(function() { 
+                        if(chrome && chrome.runtime) {
+                            chrome.runtime.sendMessage({action: 'isReady'}, function (success) {
+                                $scope.ready = success;
+                                $timeout(0);
+                                console.log("Checking every 10s if Log Tracer is available.");
+                            });
+                        }
+                    }, 10000);
+                    
+                    communications.listen($scope);                    
                 }
-
-                // Start listening for Requests
-                communications.listen($scope);
             };
 
             $scope.requests = function () {
@@ -150,14 +160,15 @@ angular.module('aem-chrome-plugin-app')
             };
 
             $scope.download = function (data, name, type) {
-                var url = $scope.activeRequest.request.method + ' ' + $scope.activeRequest.request.url;
+                var url = $scope.activeRequest.request.method 
+                            + ' ' + $scope.activeRequest.request.url;
                 download.download(data, name, url, type);
             };
 
             $scope.toggleLoggerName = function(requestTracerSet, optionsTracerSets) {
                 if (requestTracerSet && requestTracerSet.package) {
                     requestTracerSet.enabled = !requestTracerSet.enabled;
-                    tracerSet.syncRequestToOptions(requestTracerSet, optionsTracerSets);
+                    tracerSet.syncRequestLoggerNamesToOptions(requestTracerSet, optionsTracerSets);
                 }
             };
 
@@ -166,7 +177,6 @@ angular.module('aem-chrome-plugin-app')
             };
 
             $scope.syncOptionRemovalToRequests = function(removedTracerSet, requestTracerSets) {
-                tracerSet.syncOptionRemovalToRequests(removedTracerSet, requestTracerSets);
+                tracerSet.syncOptionRemovalToRequestLoggerNames(removedTracerSet, requestTracerSets);
             };
-
         }]);

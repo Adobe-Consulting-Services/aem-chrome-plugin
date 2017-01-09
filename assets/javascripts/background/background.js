@@ -24,9 +24,10 @@ var tracer = (function(global){
     var tabCount = 0;
     var listenerRegistered = false;
     var tabs = {};
-    var api ={};
+    var api = {};
     var activationCallback;
     var deactivationCallback;
+    var options = {};
 
     api.registerTab = function(tabId){
         console.assert(typeof tabId !== 'undefined');
@@ -77,15 +78,28 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
       JSON.stringify({
           user: 'admin',
           password: 'admin',
-          tracerIds: 'oak-query,oak-writes',
-          tracerSets: [],
+          tracerSets: [
+              {
+                enabled: true,
+                permanent: true,
+                package: 'org.apache.jackrabbit.oak.query',
+                level: 'DEBUG'
+              },
+              {
+                enabled: true,
+                permanent: true,
+                package: 'org.apache.jackrabbit.oak.jcr.operations.writes',
+                level: 'TRACE'
+              }
+          ],
           servletContext: '',
           maxHistory: 200
       })
   );
 }
+    
 
-// an array of all the connections
+// An array of all the connections
 var ports =[];
 chrome.runtime.onConnect.addListener(function(port) {
     console.assert(port.name == "aem-chrome-plugin");
@@ -131,15 +145,15 @@ chrome.runtime.onMessage.addListener(
     } else if (message.action === 'updateURLFilter') {
       // sync the urlFilter from AEMPanel to background.js
       urlFilter = (message.urlFilter || '').trim();
-    } else if (message.action === 'getTracerConfig') {
-      getTracerConfig(callback, message.overrides);
+    } else if (message.action === 'isReady') {
+      isReady(callback);
       return true;
     } else if(message.action === "af-editor-loaded"){
         sendToDevTools(message);
     }
   });
 
-function getOptions(optionsCallback, overrides) {
+function getOptions(optionsCallback) {
   var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
       origin = 'http://localhost:4502';
 
@@ -149,13 +163,6 @@ function getOptions(optionsCallback, overrides) {
           if (tabs && tabs.length === 1) {
               url = new URL(tabs[0].url);
               origin = url.origin;
-          }
-
-          // handle any overrides if they exist
-          if (overrides) {
-            if (overrides.origin) {
-              origin = overrides.origin;
-            }
           }
 
           var optionsData = {
@@ -170,7 +177,7 @@ function getOptions(optionsCallback, overrides) {
       });
 }
 
-function getWithAuth(url, callback, overrides) {
+function getWithAuth(url, callback) {
   getOptions(function (options) {
       $.ajax({
           url: options.url(url),
@@ -178,61 +185,30 @@ function getWithAuth(url, callback, overrides) {
           beforeSend: function(xhr) {
               xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
           }
-      }).always(function(data) {
+      }).always(function(data, status) {
           if (callback) {
-              callback(data);
+              callback(data, status);
           }
       });
-  }, overrides);
+  });
 }
 
 /**
- * Make XHR request to Sling Tracer endpoint to collect JSON data.
+ * Make XHR to determine if the Sling Log Tracer is accepting requests.
  **/
-function getTracerConfig(callback, overrides) {
-  var BUNDLE_URL = '/system/console/bundles/org.apache.sling.tracer.json',
-      CONFIG_URL = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer.json',
-      status = { };
-
-  console.log('Requesting Sling Tracer Bundle information @ ' + BUNDLE_URL);
-
-  getWithAuth(BUNDLE_URL, function(d) {
-    if (d && d.data && d.data[0]) {
-      status.bundleActive = 'Active' === d.data[0].state;
-      status.bundleVersion = d.data[0].version || '0.0.0';
-
-      if (status.bundleActive) {
-        console.log('Requesting Sling Tracer Config information @ ' + CONFIG_URL);
-
-        getWithAuth(CONFIG_URL, function(d2) {
-          var properties;
-
-          if (d2 && d2[0] && d2[0].properties) {
-            properties = d2[0].properties;
-            status.configEnabled = properties.enabled.value || false;
-            status.configServletEnabled = properties.servletEnabled.value || false;
-            status.configTracerSets = properties.tracerSets.values || [];
-          }
-
-          callback(status);
-        }, overrides);
-      } else {
-        callback(status);
-      }
-    } else {
-      callback(status);
-    }
-  }, overrides);
+function isReady(callback) {
+    var SLING_TRACER_URL = '/system/console/tracer';
+     getWithAuth(SLING_TRACER_URL, function(data, status) {
+        callback(status === 'success');
+     });
 }
-
-
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
 function getSlingTracerJSON(request, sender, callback) {
   var url = '/system/console/tracer/' + request.requestId + '.json';
-      // Servlet context can be supported by adding to the options.host configuration
+  // Servlet context can be supported by adding to the options.host configuration
 
   console.log('Requesting Sling Tracer information @ ' + url);
   getWithAuth(url, callback);
@@ -255,13 +231,25 @@ var injectHeaderListener = function (details) {
       name: 'Sling-Tracer-Record',
       value: 'true'
     });
-
+      
+    /*  
     details.requestHeaders.push({
       name: 'Sling-Tracers',
-      value: options.tracerIds
+      value: (options.tracerIds || []).join(',') + ';caller=true'
     });
+    */
 
     var tracerSets = [];
+    $.each(options.providedTracerSets, function(index, value) {
+        var tracerSetConfig;
+      if (value.enabled && value.package) {
+          tracerSetConfig = value.package;
+          tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
+          tracerSetConfig = tracerSetConfig + ';caller=true';
+          tracerSets.push(tracerSetConfig);
+      }
+    });
+      
     $.each(options.tracerSets, function(index, value) {
         var tracerSetConfig;
       if (value.enabled && value.package) {
@@ -280,7 +268,7 @@ var injectHeaderListener = function (details) {
     } else {
         details.requestHeaders.push({
             name: 'Sling-Tracer-Config',
-            value: 'sling-tracer-configs-not-set;caller=true'
+            value: 'sling-tracer-configs-undefined;caller=true'
         });
     }
   }

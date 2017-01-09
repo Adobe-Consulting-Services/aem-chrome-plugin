@@ -36,104 +36,34 @@
       </h2>
 
       <div class="wrapper">
-        <div ng-show="!osgi.valid"
-            class="error-instructions">
-            <!-- Bundle is not installed -->
-            <div ng-show="!osgi.bundle.exists.valid || !osgi.bundle.version.valid">
-              <p>AEM Chrome Plug-in requires AEM 6.0+ and Sling Apache Log Tracer version 1.0.2+</p>
-              <p>Please download the latest Apache Sling Log Tracer Bundle and install on the target AEM instance and refresh this page.</p>
-              <ul>
-                <li><a class="button" target="sling-download" href="http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22org.apache.sling.tracer%22">Download the Apache Sling Log Tracer 1.0.2+ Bundle</a></li>
-                <li><a class="button" target="felix-bundles" href="{{ options.origin }}/system/console/bundles">Install the Apache Sling Log Tracer Bundle</a></li>
-              </ul>
-            </div>
-
-            <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid">
-                <p>The installed Apache Sling Log Tracer bundle is mis-configured.</p>
-                <p>Please review and correct the configuration.</p>
-                <a class="button" href="#osgi-status">Review the Current Configuration</a>
-            </div>
-        </div>
 
         <form class="form-options">
-          <legend>Options</legend>
+          <legend>Global options</legend>
+            <p><em>
+                Global options are for requesting the Log Tracer data from AEM. These setting are global for all browser tabs. If different tabs require different servlet context or credentials, these options must be updated as you move between the browser tabs.</em>
+            </p>
+            
+            <p>
+            For more information visit the <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>.
+            </p>
+            
           <label class="text">
-            Servlet Context
+            Servlet context
             <br/>
             <input type="text" ng-model="options.servletContext"/>
           </label>
           <label class="text">
-            Web Console User
+            Web console user
             <br/>
             <input type="text" ng-model="options.user"/>
           </label>
           <label class="text">
-            Web Console Password
+            Web console password
             <br/>
             <input type="text" ng-model="options.password"/>
           </label>
         </form>
 
-        <hr/>
-
-
-        <div id="osgi-status"
-             class="form-options osgi-status">
-          <h2>Apache Sling Log Tracer OSGi Status</h2>
-
-          <label class="text">
-            Test Configuration for AEM Host
-            <br/>
-            <input type="text" ng-model="options.origin"/>
-          </label>
-
-          <div ng-show="osgi.bundle.exists.valid && osgi.bundle.version.valid">
-
-            <h4>
-              <a target="_blank" href="{{ options.origin }}/system/console/bundles">
-              Apache Sling Log Tracer OSGi Bundle</a>
-            </h4>
-            <ul>
-              <li class="{{ osgi.bundle.active.valid ? '' : 'error' }}">
-                  <label>Active</label>:
-                  <span>{{ osgi.bundle.active.value }}</span>
-              </li>
-
-              <li class="{{ osgi.bundle.version.valid ? '' : 'error' }}">
-                  <label>Version</label>:
-                  <span>{{ osgi.bundle.version.value }}</span>
-              </li>
-            </ul>
-
-            <div ng-show="osgi.bundle.active.valid && osgi.bundle.version.valid">
-              <h4>
-                <a target="_blank" href="{{ options.origin }}/system/console/configMgr/configMgr/org.apache.sling.tracer.internal.LogTracer">
-                Apache Sling Log Tracer OSGi Component Configuration</a>
-              </h4>
-
-              <ul>
-                <li class="{{ osgi.config.enabled.valid ? '' : 'error' }}">
-                    <label>Enabled</label>:
-                    <span>{{ osgi.config.enabled.value || false }}</span>
-                </li>
-                <li class="{{ osgi.config.servletEnabled.valid ? '' : 'error' }}">
-                    <label>Servlet Enabled</label>:
-                    <span>{{ osgi.config.servletEnabled.value || false }}</span>
-                </li>
-                <li class="{{ osgi.config.tracerSets.valid ? '' : 'error' }}">
-                    <label>Tracer Sets</label>:
-                    <ul ng-show="osgi.config.tracerSets.valid"
-                        ng-repeat="tracerSet in osgi.config.tracerSets.value">
-                      <li>{{ tracerSet }}</li>
-                    </ul>
-                    <span ng-hide="osgi.config.tracerSets.valid">
-                      No Sling Tracer sets configured.
-                    </span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="footer">
         AEM Chrome Plug-in is inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.

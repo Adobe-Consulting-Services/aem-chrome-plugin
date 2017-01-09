@@ -18,11 +18,23 @@
  * #L%
  */
 
+#tracerPlugin textarea, 
+#tracerPlugin input, 
+#tracerPlugin button { 
+    /* Remove blue input highlight */
+    outline: none; 
+}
+
 #tracerPlugin .control-bar {
     background: rgba(0, 0, 0, 0.05);
     height: 31px;
     border-bottom: solid 1px #ccc;
     padding: 4px 10px;
+    overflow: hidden;
+}
+
+#tracerPlugin .control-bar * {
+    margin-bottom: 10px;
 }
 
 #tracerPlugin .control-bar .control-url-filter input[type=text],
@@ -67,6 +79,10 @@
     margin-right: 1rem;
 }
 
+#tracerPlugin input.tracer-set--package {
+
+}
+
 #tracerPlugin .tracer-log-list--entry--caller-button {
     color: #999;
 }
@@ -97,4 +113,51 @@
 #tracerPlugin .logger-names--list li {
     list-style: none;
     margin: .5rem;
+}
+
+/* Mini Options */
+#tracerPlugin .mini-options--button {
+  float: right;
+}
+
+#tracerPlugin #mini-options {
+  position: absolute;
+  padding: 1em;
+  background-color: #eee;
+  color: black;
+  z-index: 100000;
+  right: 0;
+  top: 0;
+  border-top: dashed 1px #9B9B9B;
+  border-left: solid 1px #9B9B9B;
+  width: 720px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+#tracerPlugin #mini-options .mini-options--close {
+  float: right;
+}
+
+#tracerPlugin #mini-options .tracer-set {
+  margin: .25rem 0;
+}
+
+#tracerPlugin #mini-options .field-wrapper label {
+  display: inline-block;
+  width: 150px;
+}
+
+#tracerPlugin #mini-options .field-wrapper input[type=text] {
+  width: 280px;
+  padding: 2px;
+}
+
+#tracerPlugin #mini-options .field-wrapper .tracer-set input[type=text] {
+  width: 500px;
+  padding: 2px;
+}
+
+#tracerPlugin #mini-options .tracer-set--add {
+  margin-top: .5rem;
 }
