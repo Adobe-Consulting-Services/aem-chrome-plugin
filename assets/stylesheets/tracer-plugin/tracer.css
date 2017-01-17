@@ -85,6 +85,8 @@
 
 #tracerPlugin .tracer-log-list--entry--caller-button {
     color: #999;
+    margin-bottom: .25rem;
+    margin-right: .25rem;
 }
 
 #tracerPlugin .tracer-log-list--entry--caller-button:active {
@@ -160,4 +162,29 @@
 
 #tracerPlugin #mini-options .tracer-set--add {
   margin-top: .5rem;
+}
+
+/* Error overlay */
+
+.error-overlay {
+  border-top: solid 1px #666;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.80);
+  color: white;
+  z-index: 1000000000;
+}
+
+.error-overlay .error-message {
+  background-color: #fcfcfc;
+  margin: 3rem auto 0 auto;
+  color: #333;
+  width: 800px;
+  font-size: .8rem;
+  padding: .5rem 2rem 2.5rem 2rem;
+  border-radius: 3px;
+  border: solid 1px #333;
 }

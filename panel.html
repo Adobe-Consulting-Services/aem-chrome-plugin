@@ -61,7 +61,6 @@
 
     <script src="assets/javascripts/tracer-plugin/services/requests-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/communications-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/tracer-status-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/download-service.js"></script>
       <script src="assets/javascripts/tracer-plugin/services/tracer-set-service.js"></script>
 
@@ -104,14 +103,14 @@
             <h4>Provided Tracer Sets</h4>
             <div class="field-wrapper">
                 <div class="tracer-set"
-                     ng-repeat="set in options.providedTracerSets track by $index">
+                     ng-repeat="tracerSet in options.providedTracerSets track by $index">
                     <span class="tracer-set--enabled--wrapper">
                         <input class="tracer-set--enabled"
-                             type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+                             type="checkbox" ng-model="tracerSet.enabled" ng-checked="tracerSet.enabled" ng-true-value="true" ng-true-false="false"/>
                     </span>
-                    <input class="tracer-set--package" type="text" ng-model="set.package" readonly />
+                    <input class="tracer-set--package" type="text" ng-model="tracerSet.package" readonly />
                     
-            <select class="tracer-set--level" ng-model="set.level">
+                     <select class="tracer-set--level" ng-model="tracerSet.level">
                         <option value="TRACE">TRACE</option>
                         <option value="DEBUG">DEBUG</option>
                         <option value="INFO">INFO</option>
@@ -120,18 +119,21 @@
                     </select>
                 </div>               
             </div>                
-                
-                
+                                
             <h4>Ad-Hoc Tracer Sets</h4>
             <div class="field-wrapper">
                 <div class="tracer-set"
-                     ng-repeat="set in options.tracerSets track by $index">
+                     ng-repeat="tracerSet in options.tracerSets track by $index">
                     <span class="tracer-set--enabled--wrapper">
                         <input class="tracer-set--enabled"
-                             type="checkbox" ng-model="set.enabled" ng-true-value="true" ng-true-false="false"/>
+                             type="checkbox" 
+                             ng-model="tracerSet.enabled" 
+                             ng-checked="tracerSet.enabled" 
+                             ng-true-value="true" 
+                             ng-true-false="false"/>
                     </span>
-                    <input class="tracer-set--package" type="text" ng-model="set.package" placeholder="Package"/>
-                    <select class="tracer-set--level" ng-model="set.level">
+                    <input class="tracer-set--package" type="text" ng-model="tracerSet.package" placeholder="Package"/>
+                    <select class="tracer-set--level" ng-model="tracerSet.level">
                         <option value="TRACE">TRACE</option>
                         <option value="DEBUG">DEBUG</option>
                         <option value="INFO">INFO</option>
@@ -141,7 +143,7 @@
                     <button
                             class="tracer-set--remove"
                             ng-click="options.tracerSets.splice($index, 1); 
-                                      syncOptionRemovalToRequests(set, activeTracerData.loggerNames)">Remove
+                                      syncOptionRemovalToRequests(tracerSet, activeTracerData.loggerNames)">Remove
                     </button>
                 </div>
             </div>
@@ -167,6 +169,21 @@
                                 <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>                                
                                 </strong></li>
                         </ul>
+
+                        <p>This error displays when AEM Chrome Plug-in cannot content the AEM instance(s) to collect Sling Log Tracer data. The following are common causes:</p>
+                        <ul>
+                            <li>Apache Sling Log Tracer bundle is not installed, ative, enabled or servlet-enabled on the AEM instance(s).</li>
+                            <li>The Sling Log Tracer end-point is blocked (HTTP GET /system/console/tracer should return a 200 status)</li>
+                            <li>The Web console user name/password have not been configured in AEM Chrome Plugin > Options</li>
+                            <li>The host name used to access AEM in Chrome disallows access to Sling Tracer HTTP end-points. 
+                                <br/>Use AEM Chrome Plugin > Options > Host Configurations to map a browser host names to an accessible end-points.
+                                <ul>
+                                    <li>This is helpful for using AEM Chrome Plug-in with a multi-AEM backed environment (Example: AEM Publish tier)</li>
+                                </ul>
+                            </li>
+                            <li>AEM is configured to use a servlet context, but none has been provided via AEM Chrome Plug-in > Options</li>
+                            <li>Another Chrome tab is active (example: AEM Chrome Plug-in > Options) and AEM Chrome Plug-in became mixed up as which is the proper tab to track. Simply reload AEM Chrome Plug-in on your AEM tab.</li>
+                            
                     </div>
                 </div>
 
@@ -355,7 +372,10 @@
 
                             <!-- Caller Tab Panel -->
                               <div id="tab-logger-names">
-                                  <h4>Request's call stack. <em>Checkboxes add/remove packages from Tracer Sets.</em></h4>
+                                  <h4>Request's call stack.</h4>
+                                  <p> 
+                                      <em>Check boxes add/remove packages from Tracer Sets.</em>
+                                  </p>
 
                                 <ul class="logger-names--list">
                                     <li ng-repeat="loggerName in syncOptionsToRequestLoggerNames(options.tracerSets, activeTracerData.loggerNames) track by $index">

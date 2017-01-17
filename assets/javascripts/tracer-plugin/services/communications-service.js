@@ -46,9 +46,11 @@ angular.module('aem-chrome-plugin-app')
               function(data) {
                 if (data) {
                   scope.processRequest(request, data);
+                  // TODO: Better added to a directive
+                  $('.data-container').scrollTop(100000000);
+                } else {
+                  console.log('Unable to collect Sling Log Tracer data');                    
                 }
-                // TODO: Better added to a directive
-                $('.data-container').scrollTop(100000000);
               }
             );
           }

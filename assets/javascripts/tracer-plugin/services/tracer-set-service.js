@@ -66,8 +66,6 @@ angular.module('aem-chrome-plugin-app')
                         }
                     });
                 });
-
-                return requestTracerSets;
             },
             syncRequestLoggerNamesToOptions: function(requestTracerSet, optionsTracerSets) {
                 var found = false;
@@ -80,12 +78,13 @@ angular.module('aem-chrome-plugin-app')
                 });
 
                 if (!found) {
-                    // Add to options
+                    // Add as new Packer to Options
                     optionsTracerSets.push({
-                        enabled: requestTracerSet.enabled,
+                        enabled: true,
                         package: requestTracerSet.package,
-                        level: requestTracerSet.level
+                        level: 'DEBUG'
                     });
+                    console.log(optionsTracerSets);
                 }
             },
             syncOptionRemovalToRequestLoggerNames: function(removedTracerSet, requestTracerSets) {

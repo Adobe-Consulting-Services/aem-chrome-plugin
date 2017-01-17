@@ -140,84 +140,149 @@ function sendToDevTools(msg){
 chrome.runtime.onMessage.addListener(
   function(message, sender, callback) {
     if (message.action === 'getSlingTracerJSON') {
-      getSlingTracerJSON(message, sender, callback);
+      getSlingTracerJSON(message.requestId, callback);
       return true;
     } else if (message.action === 'updateURLFilter') {
       // sync the urlFilter from AEMPanel to background.js
       urlFilter = (message.urlFilter || '').trim();
-    } else if (message.action === 'isReady') {
-      isReady(callback);
+    } else if (message.action === 'isAEMReadyForLogTracer') {
+      isAEMReadyForLogTracer(callback);
       return true;
     } else if(message.action === "af-editor-loaded"){
         sendToDevTools(message);
     }
-  });
-
-function getOptions(optionsCallback) {
-  var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')),
-      origin = 'http://localhost:4502';
-
-      // Get the origin of the active window
-      chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
-          var url;
-          if (tabs && tabs.length === 1) {
-              url = new URL(tabs[0].url);
-              origin = url.origin;
-          }
-
-          var optionsData = {
-              host: origin + (options.servletContext || ''),
-              user: options.user,
-              password: options.password,
-              url: function(url) {
-                  return origin + (options.servletContext || '') + url;
-              }
-          };
-          optionsCallback(optionsData);
-      });
-}
-
-function getWithAuth(url, callback) {
-  getOptions(function (options) {
-      $.ajax({
-          url: options.url(url),
-          method: 'GET',
-          beforeSend: function(xhr) {
-              xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
-          }
-      }).always(function(data, status) {
-          if (callback) {
-              callback(data, status);
-          }
-      });
-  });
-}
+  }
+);
 
 /**
  * Make XHR to determine if the Sling Log Tracer is accepting requests.
  **/
-function isReady(callback) {
+function isAEMReadyForLogTracer(callback) {
     var SLING_TRACER_URL = '/system/console/tracer';
-     getWithAuth(SLING_TRACER_URL, function(data, status) {
-        callback(status === 'success');
+
+     getWithAuthenticatedAjax(SLING_TRACER_URL, function(data) {
+        // Return true on success
+        callback(data !== null);
      });
 }
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
-function getSlingTracerJSON(request, sender, callback) {
-  var url = '/system/console/tracer/' + request.requestId + '.json';
+function getSlingTracerJSON(requestId, callback) {
+  console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
   // Servlet context can be supported by adding to the options.host configuration
-
-  console.log('Requesting Sling Tracer information @ ' + url);
-  getWithAuth(url, callback);
+  getWithAuthenticatedAjax('/system/console/tracer/' + requestId + '.json', function(data) {
+        // Return true on success
+        callback(data);
+    });
 }
 
+function getWithAuthenticatedAjax(url, callback) {
+  getOptions(function (options) {
+      var uri = options.url(url);
+
+      $.ajax({
+          url: uri,
+          method: 'GET',
+          beforeSend: function(xhr) {
+              xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+          }
+      }).always(function(data, status) {
+          if (callback) {
+              console.log('AJAX Request made to: ' + uri + ' -> ' + status);
+              
+              if (status !== 'success') {
+                  data = null;
+              } else {
+                  data = data || 'success';
+              }
+
+              callback(data);
+          }
+      });
+  });
+}
+
+function getOptions(callback) {
+      var tabOrigin = 'http://localhost:4502';
+
+      // Get the origin of the active window
+      chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
+          var url;
+
+          if (tabs && tabs.length === 1) {
+              url = new URL(tabs[0].url);
+              tabOrigin = url.origin;
+              console.log('Tab Origin derived from active tab: ' + tabOrigin);
+          } else {
+              console.error('No active tabs found. Could not derive actual Tab Origin. Defaulting to: ' + tabOrigin);
+          }
+
+          $.each(getHttpParams(tabOrigin), function(index, httpParam) { 
+              callback(httpParam);
+          });
+      });
+}
+
+function getHttpParams(tabOrigin) {
+    var params = [],
+        options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
+
+    tabOrigin = stripTrailingSlash(tabOrigin);
+
+    console.log('Deriving proper AEM end-points to retrieve Sling Tracer Data from based on Tab Origin: ' + tabOrigin);
+
+    // Prevents errors in timing corner cases    
+    options.tabHostOptions = options.tabHostOptions || [];
+    $.each(options.tabHostOptions, function(index, tabHostOption) {
+        // Check if the tab's origin matches a tab host option configuration
+        if (tabOrigin === stripTrailingSlash(tabHostOption.tabHost) && params.length === 0) {
+            // Tab host option configuration is found
+            tabHostOption.tracerHosts = tabHostOption.tracerHosts || [];            
+            $.each(tabHostOption.tracerHosts, function(index, tracerHost) {
+                params.push(getParam(tracerHost.origin, tabHostOption.servletContext, tabHostOption.user, tabHostOption.password));
+            });
+        }
+    });
+
+    if (params.length === 0) {
+        params.push(getParam(tabOrigin, options.servletContext, options.user, options.password));
+    } 
+
+    return params;
+}
+
+function stripTrailingSlash(str) {
+    if (!str) {
+        str = '';
+    } else if (str.indexOf("/") === str.length - 1) {
+        str.splice(str.length - 1, 1);
+    }
+    return str;
+}
+
+function getParam(origin, servletContext, user, password) {
+    return {
+        host: origin + (servletContext || ''),
+        user: user,
+        password: password,
+        url: function(url) {
+            return origin + (servletContext || '') + url;
+        }
+    };
+}
+
+/**
+ * This method injects the Sling Log Tracer headers into browser requests indicating how they must be traced.
+ **/
 var injectHeaderListener = function (details) {
   var options;
 
-  if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
+  if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
+      // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
+      return;
+  } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
       // URL does not match the AEM Panel urlFilter; Do not add headers.
       return;
   }
@@ -231,13 +296,6 @@ var injectHeaderListener = function (details) {
       name: 'Sling-Tracer-Record',
       value: 'true'
     });
-      
-    /*  
-    details.requestHeaders.push({
-      name: 'Sling-Tracers',
-      value: (options.tracerIds || []).join(',') + ';caller=true'
-    });
-    */
 
     var tracerSets = [];
     $.each(options.providedTracerSets, function(index, value) {

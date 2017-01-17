@@ -19,55 +19,120 @@
   -->
 
 <html ng-app="aem-chrome-plugin-app">
-  <head>
-    <link rel="stylesheet" type="text/css" href="vendor/assets/stylesheets/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/options.css">
-    <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
-    <script src="vendor/assets/javascripts/angular.min.js"></script>
-    <script src="assets/javascripts/tracer-plugin/app.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/tracer-status-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
-  </head>
-  <body>
-    <div class="container" ng-controller="OptionsCtrl">
-      <h2>
-        <img src="assets/images/aem-chrome-plugin_logo_48x48.png"/>
-        AEM Chrome Plug-in
-      </h2>
 
-      <div class="wrapper">
+<head>
+  <link rel="stylesheet" type="text/css" href="vendor/assets/stylesheets/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="assets/stylesheets/options.css">
+  <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
+  <script src="vendor/assets/javascripts/angular.min.js"></script>
+  <script src="assets/javascripts/tracer-plugin/app.js"></script>
+  <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
+  <title>AEM Chrome Plug-in | Options</title>
+</head>
 
-        <form class="form-options">
-          <legend>Global options</legend>
-            <p><em>
-                Global options are for requesting the Log Tracer data from AEM. These setting are global for all browser tabs. If different tabs require different servlet context or credentials, these options must be updated as you move between the browser tabs.</em>
-            </p>
-            
-            <p>
-            For more information visit the <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>.
-            </p>
-            
-          <label class="text">
+<body>
+  <div class="container" ng-controller="OptionsCtrl">
+    <h2>
+      <img src="assets/images/aem-chrome-plugin_logo_48x48.png" /> AEM Chrome Plug-in
+    </h2>
+
+    <div class="wrapper">
+
+      <h3>Default Options</h3>
+        <p>
+          <em>
+            Global options are for requesting the Log Tracer data from AEM. These setting are global for all browser tabs. If different tabs require different servlet context or credentials, these options must be updated as you move between the browser tabs.
+          </em>
+        </p>
+
+      <form class="form-options">
+
+        <p>
+          For more information visit the <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/"
+            target="_blank">AEM Chrome Plug-in documentation Web site</a>.
+        </p>
+
+        <label class="text">
             Servlet context
             <br/>
             <input type="text" ng-model="options.servletContext"/>
           </label>
-          <label class="text">
+        <label class="text">
             Web console user
             <br/>
             <input type="text" ng-model="options.user"/>
           </label>
-          <label class="text">
+        <label class="text">
             Web console password
             <br/>
             <input type="text" ng-model="options.password"/>
           </label>
-        </form>
+      </form>
 
-      </div>
-      <div class="footer">
-        AEM Chrome Plug-in is inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.
-      </div>
+      <h3>Host Configurations</h3>
+      <p>
+        Host configurations should be used when you access an AEM instance from one host name, but the Sling Log Tracer end-points
+        (/system/console/tracer) are available from one or many other host names.
+      </p>
+      <p>
+        <em>
+            An example of this is when 1 or many AEM instances are fronted by a single host-name that is assocated with CDN orWeb server tier. 
+            In this scenario AEM may be accessed via www.example.com however AEM Chrome Plug-in must check call AEM Publish instances directly by IP or internal host. 
+        </em>
+      </p>
+
+      <form class="form-options host-options" ng-repeat="tabHostOption in options.tabHostOptions track by $index">
+        <label class="text">
+            Host name
+            <p>Ex: http://www.example.com, https://author.internal.my-company.com</p>
+            <input type="text" ng-model="tabHostOption.tabHost"/>
+          </label>
+
+        <label class="text">
+            AEM end-points
+            <p>The end-points AEM Chrome Plug-in will check for Sling Log Tracer data.</p>
+
+            <ul class="tracer-hosts">                    
+              <li ng-repeat="tracerHost in tabHostOption.tracerHosts track by $index">
+                  <input type="text" ng-model="tracerHost.origin"/>
+                  <button class="tracer-hosts--remove" ng-click="tabHostOption.tracerHosts.splice($index, 1)">Remove</button>
+              </li>
+              <li class="tracer-hosts--add"><button ng-click="addTabHostOptionTracerHost(tabHostOption)">Add</button></li>
+            </ul>
+          </label>
+
+        <label class="text">
+            Servlet context
+            <input type="text" ng-model="tabHostOption.servletContext"/>
+          </label>
+
+        <label class="text">
+            Web console user
+            <br/>
+            <input type="text" ng-model="tabHostOption.user"/>
+          </label>
+        <label class="text">
+            Web console password
+            <br/>
+            <input type="text" ng-model="tabHostOption.password"/>
+          </label>
+
+        <button ng-click="options.tabHostOptions.splice($index, 1)">Remove this Host Configuration</button>
+      </form>
+
+      <button ng-click="options.tabHostOptions.push({
+          tracerHosts: [],
+          user: 'admin',
+          password: 'password'
+        })">Add a new Host Configuration</button>
+
     </div>
-  </body>
+  </div>
+  <div class="wrapper footer">
+    <hr/>
+    AEM Chrome Plug-in is inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.
+  </div>
+  </div>
+</body>
+
 </html>
