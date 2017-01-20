@@ -81,7 +81,7 @@ angular.module('aem-chrome-plugin-app')
 
             $scope._checkReadiness = function(wait) {
                 var SUCCESS_WAIT = 60000,
-                    FAILURE_WAIT = 5000,
+                    FAILURE_WAIT = 2000,
                     interval;
 
                 interval = $interval(function() { 

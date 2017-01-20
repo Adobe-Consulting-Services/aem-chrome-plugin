@@ -92,7 +92,7 @@
                 <div class="aem-chrome-plugin-requests-controller split-view"
                      ng-controller="OptionsCtrl">
                     
-<!-- Start Options -->
+<!-- Start Inline Options -->
 <div id="mini-options" ng-show="showMiniOptions">
 
         <button class="mini-options--close"
@@ -370,12 +370,12 @@
                                 </div>
                             </div>
 
-                            <!-- Caller Tab Panel -->
+                            <!-- Logger Names Tab Panel -->
                               <div id="tab-logger-names">
-                                  <h4>Request's call stack.</h4>
-                                  <p> 
-                                      <em>Check boxes add/remove packages from Tracer Sets.</em>
-                                  </p>
+                                  <p><em> 
+                                      Only packages that have log statements in the execution path for this request display below.                                      
+                                      Check boxes to add/remove packages from Tracer Sets.
+                                  </em></p>
 
                                 <ul class="logger-names--list">
                                     <li ng-repeat="loggerName in syncOptionsToRequestLoggerNames(options.tracerSets, activeTracerData.loggerNames) track by $index">
