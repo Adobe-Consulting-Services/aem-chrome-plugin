@@ -18,7 +18,8 @@
  * #L%
  */
 
-var urlFilter = '';
+var urlFilter = '',
+    currentTabIsTraceable = true;
 
 var tracer = (function(global){
     var tabCount = 0;
@@ -162,7 +163,9 @@ function isAEMReadyForLogTracer(callback) {
 
      getWithAuthenticatedAjax(SLING_TRACER_URL, function(data) {
         // Return true on success
-        callback(data !== null);
+        currentTabIsTraceable = data !== null;
+        console.log('Current tab is found to traceable: ' + currentTabIsTraceable);
+        callback(currentTabIsTraceable);
      });
 }
 
@@ -170,9 +173,10 @@ function isAEMReadyForLogTracer(callback) {
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
 function getSlingTracerJSON(requestId, callback) {
-  console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
-  // Servlet context can be supported by adding to the options.host configuration
-  getWithAuthenticatedAjax('/system/console/tracer/' + requestId + '.json', function(data) {
+    console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
+  
+    // Servlet context can be supported by adding to the options.host configuration
+    getWithAuthenticatedAjax('/system/console/tracer/' + requestId + '.json', function(data) {
         // Return true on success
         callback(data);
     });
@@ -180,7 +184,15 @@ function getSlingTracerJSON(requestId, callback) {
 
 function getWithAuthenticatedAjax(url, callback) {
   getOptions(function (options) {
-      var uri = options.url(url);
+      var uri;
+      
+      if (!options || options == null) { 
+          console.log('Could not derive options for the active tab (more likely there is no active tab)');
+          callback(null); 
+          return;
+      }
+      
+      uri = options.url(url);
 
       $.ajax({
           url: uri,
@@ -208,21 +220,29 @@ function getOptions(callback) {
       var tabOrigin = 'http://localhost:4502';
 
       // Get the origin of the active window
-      chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
-          var url;
+      if (chrome && chrome.tabs && chrome.tabs.query) { 
+          chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
+              var url;
 
-          if (tabs && tabs.length === 1) {
-              url = new URL(tabs[0].url);
-              tabOrigin = url.origin;
-              console.log('Tab Origin derived from active tab: ' + tabOrigin);
-          } else {
-              console.error('No active tabs found. Could not derive actual Tab Origin. Defaulting to: ' + tabOrigin);
-          }
+              if (tabs && tabs.length === 1) {
+                  url = new URL(tabs[0].url);
+                  tabOrigin = url.origin;
+                  console.log('Tab Origin derived from active tab: ' + tabOrigin);
+              } else {
+                  console.log('No active tabs found. Could not derive actual Tab Origin.');
+                  callback(null);
+                  return;
+              }
 
-          $.each(getHttpParams(tabOrigin), function(index, httpParam) { 
-              callback(httpParam);
+              $.each(getHttpParams(tabOrigin), function(index, httpParam) { 
+                  callback(httpParam);
+              });
           });
-      });
+      } else {
+        console.log('Chrome Tabs object could not be found. It is likely this dev panel lost associated with any tab. Please close AEM Chrome Plug-in and open it docked to a Chrome Tab.');
+        callback(null);
+        return;
+      }
 }
 
 function getHttpParams(tabOrigin) {
@@ -279,7 +299,10 @@ function getParam(origin, servletContext, user, password) {
 var injectHeaderListener = function (details) {
   var options;
 
-  if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
+  if (!currentTabIsTraceable) {
+      // Current tab does not have a backing Sling Log Tracer endpoint so dont bother with this request.
+      return;
+  } else if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
       // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
       return;
   } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {

@@ -73,37 +73,47 @@ angular.module('aem-chrome-plugin-app')
                         // Do nothing
                     });
                     
-                    $scope._checkReadiness(1000);
+                    $scope.checkReadiness(true);
 
                     communications.listen($scope);                    
                 }
             };
 
-            $scope._checkReadiness = function(wait) {
-                var SUCCESS_WAIT = 60000,
-                    FAILURE_WAIT = 2000,
+            $scope.checkReadiness = function(repeat) {
+                var SUCCESS_WAIT = 30000,
+                    FAILURE_WAIT = 10000,
                     interval;
+                
+                if (chrome && chrome.runtime) {
+                    console.log("Dev Panel is attached to Chrome; Making XHR to check if AEM is ready");
+                    chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer'}, function (success) {
+                        console.log('Check Readiness: ' + success);
+                        $scope.ready = success;
+                        $timeout(0);                            
 
-                interval = $interval(function() { 
-                    if (chrome && chrome.runtime) {
-                        chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer'}, function (success) {
-                            $scope.ready = success;
-                            if (!success) {
-                                console.log('Unable to find valid Sling Log Tracer endpoint');
-                                $interval.cancel(interval);
-                                interval = $scope._checkReadiness(FAILURE_WAIT);
-                            } else {
-                                $interval.cancel(interval);
-                                interval = $scope._checkReadiness(SUCCESS_WAIT);
+                        if (!success) {
+                            console.log('Unable to find valid Sling Log Tracer endpoint');
+                            console.log(repeat);
+                            if (repeat) {
+                                $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
                             }
-                            $timeout(0);                            
-                        });
-                    } else {
-                        $scope.ready = false;
-                        $interval.cancel(interval);
-                        interval = $scope._checkReadiness(FAILURE_WAIT);
-                    }       
-                }, wait);
+                        } else {        
+                            console.log('Success! Found a valid Sling Log Tracer endpoint');
+                            console.log(repeat);
+                            if (repeat) {
+                                $timeout($scope.checkReadiness, SUCCESS_WAIT, true, true);
+                            }
+                        }
+                    });
+                } else {
+                    console.log("Not attached to a tab. Please attach Dev Tools to a browser window");
+                    $scope.ready = false;
+                    $timeout(0);                            
+                    
+                    if (repeat) {
+                        $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
+                    }
+                }     
             };
 
             $scope.requests = function () {
