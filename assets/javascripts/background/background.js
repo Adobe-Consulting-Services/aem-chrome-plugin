@@ -18,17 +18,18 @@
  * #L%
  */
 
-var urlFilter = '',
-    currentTabIsTraceable = true;
+var urlFilter = '';
 
 var tracer = (function(global){
-    var tabCount = 0;
-    var listenerRegistered = false;
-    var tabs = {};
-    var api = {};
-    var activationCallback;
-    var deactivationCallback;
-    var options = {};
+    var tabCount = 0,
+        listenerRegistered = false,
+        tabs = {},
+        api = {},
+        activationCallback,
+        deactivationCallback,
+        currentTabIsTraceable = true,
+        lastGoodTabOrigin = '',
+        lastTestedTabOrigin = '';
 
     api.registerTab = function(tabId){
         console.assert(typeof tabId !== 'undefined');
@@ -163,9 +164,12 @@ function isAEMReadyForLogTracer(callback) {
 
      getWithAuthenticatedAjax(SLING_TRACER_URL, function(data) {
         // Return true on success
-        currentTabIsTraceable = data !== null;
-        console.log('Current tab is found to traceable: ' + currentTabIsTraceable);
-        callback(currentTabIsTraceable);
+        tracer.currentTabIsTraceable = data !== null;
+        console.log('Current tab is found to traceable: ' + tracer.currentTabIsTraceable);
+        if (tracer.currentTabIsTraceable) {
+            tracer.lastGoodTabOrigin = tracer.lastTestedTabOrigin;
+        }
+        callback(tracer.currentTabIsTraceable);
      });
 }
 
@@ -217,32 +221,35 @@ function getWithAuthenticatedAjax(url, callback) {
 }
 
 function getOptions(callback) {
-      var tabOrigin = 'http://localhost:4502';
+    var tabOrigin = tracer.lastGoodTabOrigin;//'http://localhost:4502';
 
-      // Get the origin of the active window
-      if (chrome && chrome.tabs && chrome.tabs.query) { 
-          chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
-              var url;
+    // Get the origin of the active window
+    if (chrome && chrome.tabs && chrome.tabs.query) {
+        chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
+            var url;
 
-              if (tabs && tabs.length === 1) {
-                  url = new URL(tabs[0].url);
-                  tabOrigin = url.origin;
-                  console.log('Tab Origin derived from active tab: ' + tabOrigin);
-              } else {
-                  console.log('No active tabs found. Could not derive actual Tab Origin.');
-                  callback(null);
-                  return;
-              }
+            if (tabs && tabs.length === 1) {
+                url = new URL(tabs[0].url);
+                tabOrigin = url.origin;
+                console.log('Tab Origin derived from active tab: ' + tabOrigin);
 
-              $.each(getHttpParams(tabOrigin), function(index, httpParam) { 
-                  callback(httpParam);
-              });
-          });
-      } else {
-        console.log('Chrome Tabs object could not be found. It is likely this dev panel lost associated with any tab. Please close AEM Chrome Plug-in and open it docked to a Chrome Tab.');
-        callback(null);
-        return;
-      }
+                tracer.lastTestedTabOrigin = tabOrigin;
+                $.each(getHttpParams(tabOrigin), function (index, httpParam) {
+                    callback(httpParam);
+                });
+            } else {
+                console.log('No active tabs found. Could not derive actual Tab Origin defaulting to last known tab origin: ' + tabOrigin);
+                $.each(getHttpParams(tabOrigin), function (index, httpParam) {
+                    callback(httpParam);
+                });
+            }
+        });
+    } else {
+        console.log('Chrome Tabs object could not be found. It is likely this dev panel lost associated with any tab. Please close AEM Chrome Plug-in and open it docked to a Chrome Tab. Defaulting to last known tab origin: ' + tabOrigin);
+        $.each(getHttpParams(tabOrigin), function (index, httpParam) {
+            callback(httpParam);
+        });
+    }
 }
 
 function getHttpParams(tabOrigin) {
@@ -299,7 +306,7 @@ function getParam(origin, servletContext, user, password) {
 var injectHeaderListener = function (details) {
   var options;
 
-  if (!currentTabIsTraceable) {
+  if (!tracer.currentTabIsTraceable) {
       // Current tab does not have a backing Sling Log Tracer endpoint so dont bother with this request.
       return;
   } else if (details.url && details.url.indexOf('/system/console/tracer') !== -1){

@@ -80,26 +80,23 @@ angular.module('aem-chrome-plugin-app')
             };
 
             $scope.checkReadiness = function(repeat) {
-                var SUCCESS_WAIT = 30000,
-                    FAILURE_WAIT = 10000,
+                var SUCCESS_WAIT = 20000,
+                    FAILURE_WAIT = 1000,
                     interval;
                 
                 if (chrome && chrome.runtime) {
                     console.log("Dev Panel is attached to Chrome; Making XHR to check if AEM is ready");
                     chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer'}, function (success) {
-                        console.log('Check Readiness: ' + success);
                         $scope.ready = success;
                         $timeout(0);                            
 
                         if (!success) {
                             console.log('Unable to find valid Sling Log Tracer endpoint');
-                            console.log(repeat);
                             if (repeat) {
                                 $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
                             }
                         } else {        
                             console.log('Success! Found a valid Sling Log Tracer endpoint');
-                            console.log(repeat);
                             if (repeat) {
                                 $timeout($scope.checkReadiness, SUCCESS_WAIT, true, true);
                             }

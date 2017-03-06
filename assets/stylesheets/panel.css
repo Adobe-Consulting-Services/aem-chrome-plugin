@@ -391,30 +391,6 @@ table#breakdown td.meter-col {
   float:left;
 }
 
-
-.tracer-log-list p {
-  padding: 0;
-  margin: 0 0 .5rem 0;
-}
-
-.tracer-log-list li {
-  border-bottom: dotted 1px #eee;
-  padding: 10px 0;
-  margin-left: 1rem;
-
-}
-
-.tracer-log-list li li {
-  padding: .25rem 0;
-  border-bottom-width: 0;
-}
-
-.tracer-log-list .params-list {
-  margin-left: -10px;
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-
 .tab-filter-wrapper {
   background-color: white;
   position: fixed;

@@ -160,7 +160,7 @@
                     <div class="error-message">
                         <h1>Attention!</h1>
 
-                        <p>AEM Chrome Plug-in could not establish a connection to Sling Log Tracer.</p>
+                        <p>AEM Chrome Plug-in could not establish a connection to Sling Log Tracer for this Chrome Tab.</p>
 
                         <button ng-click="checkReadiness(false)">Check this Chrome Tab for Sling Log Tracer Readiness</button>
                         
@@ -168,24 +168,18 @@
 
                         <ul style="margin-left: .5rem;">
                             <li><strong>
-                                <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>                                
+                                <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>
                                 </strong></li>
                         </ul>
 
-                        <p>This error displays when AEM Chrome Plug-in cannot content the AEM instance(s) to collect Sling Log Tracer data. The following are common causes:</p>
-                        <ul>
-                            <li>Apache Sling Log Tracer bundle is not installed, ative, enabled or servlet-enabled on the AEM instance(s).</li>
-                            <li>The Sling Log Tracer end-point is blocked (HTTP GET /system/console/tracer should return a 200 status)</li>
-                            <li>The Web console user name/password have not been configured in AEM Chrome Plugin > Options</li>
-                            <li>The host name used to access AEM in Chrome disallows access to Sling Tracer HTTP end-points. 
-                                <br/>Use AEM Chrome Plugin > Options > Host Configurations to map a browser host names to an accessible end-points.
-                                <ul>
-                                    <li>This is helpful for using AEM Chrome Plug-in with a multi-AEM backed environment (Example: AEM Publish tier)</li>
-                                </ul>
-                            </li>
-                            <li>AEM is configured to use a servlet context, but none has been provided via AEM Chrome Plug-in > Options</li>
-                            <li>Another Chrome tab is active (example: AEM Chrome Plug-in > Options) and AEM Chrome Plug-in became mixed up as which is the proper tab to track. Simply reload AEM Chrome Plug-in on your AEM tab.</li>
-                            
+
+                        <p>
+                            <br/>
+                            <br/>
+                            <strong>
+                            Ensure AEM Chrome Plug-in is started DOCKED to the Chrome tab that has AEM (with Sling Log Tracer enabled) opened.
+                            </strong>
+                        </p>
                     </div>
                 </div>
 
