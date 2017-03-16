@@ -327,23 +327,31 @@ var injectHeaderListener = function (details) {
       value: 'true'
     });
 
+    var callerEnabled = options.callerEnabled;
     var tracerSets = [];
     $.each(options.providedTracerSets, function(index, value) {
         var tracerSetConfig;
+        console.log(value);
       if (value.enabled && value.package) {
           tracerSetConfig = value.package;
           tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
-          tracerSetConfig = tracerSetConfig + ';caller=true';
+          if ((callerEnabled && value.caller === '') || value.caller === 'true') {
+            tracerSetConfig = tracerSetConfig + ';caller=true';
+          }
           tracerSets.push(tracerSetConfig);
       }
     });
       
     $.each(options.tracerSets, function(index, value) {
         var tracerSetConfig;
+        console.log(value);
+        
       if (value.enabled && value.package) {
           tracerSetConfig = value.package;
           tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
-          tracerSetConfig = tracerSetConfig + ';caller=true';
+          if ((callerEnabled && value.caller === '') || value.caller === 'true') {
+            tracerSetConfig = tracerSetConfig + ';caller=true';
+          }
           tracerSets.push(tracerSetConfig);
       }
     });
@@ -356,7 +364,7 @@ var injectHeaderListener = function (details) {
     } else {
         details.requestHeaders.push({
             name: 'Sling-Tracer-Config',
-            value: 'sling-tracer-configs-undefined;caller=true'
+            value: 'sling-tracer-configs-undefined'
         });
     }
   }

@@ -29,6 +29,7 @@ angular.module('aem-chrome-plugin-app')
         'CommunicationsService',
         'DownloadService',
         'TracerSetService',
+        'OptionsService',
         function ($scope,
                   $filter,
                   $timeout,
@@ -36,7 +37,8 @@ angular.module('aem-chrome-plugin-app')
                   removeHostFilter,
                   communications,
                   download,
-                  tracerSet) {
+                  tracerSet,
+                  options) {
 
             var MAX_REQUESTS = 100;
 
@@ -54,7 +56,8 @@ angular.module('aem-chrome-plugin-app')
             $scope.requests = {};
             $scope.ready = true;
             $scope.showMiniOptions = false;
-                 
+                             
+            
             /** Requests **/            
             
             $scope.$watch('controls.urlFilter', function (value) {
@@ -188,6 +191,17 @@ angular.module('aem-chrome-plugin-app')
                             + ' ' + $scope.activeRequest.request.url;
                 download.download(data, name, url, type);
             };
+            
+            $scope.toggleCallerEnabled = function() {
+                var tmp = options.getOptions();
+                tmp.callerEnabled = !tmp.callerEnabled;
+                options.setOptions(tmp);                
+            }
+            
+            $scope.getCallerEnabled = function() {
+                var callerEnabled = options.getOptions().callerEnabled;
+                return callerEnabled;
+            }
 
             $scope.toggleLoggerName = function(requestTracerSet, optionsTracerSets) {
                 if (requestTracerSet && requestTracerSet.package) {

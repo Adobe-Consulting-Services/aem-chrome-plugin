@@ -58,16 +58,15 @@
 
     <script src="assets/javascripts/tracer-plugin/directives/dividers-directive.js"></script>
     <script src="assets/javascripts/tracer-plugin/directives/log-list-directive.js"></script>
-
+    
+    <script src="assets/javascripts/tracer-plugin/services/options-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/requests-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/communications-service.js"></script>
     <script src="assets/javascripts/tracer-plugin/services/download-service.js"></script>
-      <script src="assets/javascripts/tracer-plugin/services/tracer-set-service.js"></script>
+    <script src="assets/javascripts/tracer-plugin/services/tracer-set-service.js"></script>
 
     <script src="assets/javascripts/tracer-plugin/controllers/requests-controller.js"></script>
     <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
-
-
   </head>
   <body class="aem-chrome-plugin" aem-chrome-plugin-panels>
     <div>
@@ -96,9 +95,18 @@
 <div id="mini-options" ng-show="showMiniOptions">
 
         <button class="mini-options--close"
-                ng-click="showMiniOptions = false">Close
-        </button>
+                ng-click="showMiniOptions = false">Close</button>
 
+        <div>
+            <input type="checkbox" 
+                   id="caller-enabled--checkbox"
+                   ng-checked="getCallerEnabled()" 
+                   ng-true-value="true" 
+                   ng-true-false="false"
+                   ng-click="toggleCallerEnabled()"/>
+            <label for="caller-enabled--checkbox"><strong>Include caller in logs</strong> <em>(global setting; &quot;Inherit&quot; in tracer sets use this value)</em></label>
+        </div>     
+        
         <div>
             <h4>Provided Tracer Sets</h4>
             <div class="field-wrapper">
@@ -117,6 +125,12 @@
                         <option value="WARN">WARN</option>
                         <option value="ERROR">ERROR</option>
                     </select>
+                    
+                    <select class="tracer-set--caller" ng-model="tracerSet.caller">
+                        <option value="">Inherit</option>
+                        <option value="true">Include caller</option>
+                        <option value="false">Exclude caller</option>
+                    </select>
                 </div>               
             </div>                
                                 
@@ -132,7 +146,9 @@
                              ng-true-value="true" 
                              ng-true-false="false"/>
                     </span>
+                    
                     <input class="tracer-set--package" type="text" ng-model="tracerSet.package" placeholder="Package"/>
+                    
                     <select class="tracer-set--level" ng-model="tracerSet.level">
                         <option value="TRACE">TRACE</option>
                         <option value="DEBUG">DEBUG</option>
@@ -140,6 +156,13 @@
                         <option value="WARN">WARN</option>
                         <option value="ERROR">ERROR</option>
                     </select>
+                    
+                    <select class="tracer-set--caller" ng-model="tracerSet.caller">
+                        <option value="">Inherit</option>
+                        <option value="true">Include caller</option>
+                        <option value="false">Exclude caller</option>
+                    </select>
+                    
                     <button
                             class="tracer-set--remove"
                             ng-click="options.tracerSets.splice($index, 1); 
@@ -171,7 +194,6 @@
                                 <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>
                                 </strong></li>
                         </ul>
-
 
                         <p>
                             <br/>

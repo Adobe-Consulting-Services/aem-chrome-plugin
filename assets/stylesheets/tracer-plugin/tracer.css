@@ -73,6 +73,11 @@
     width: 40%;
 }
 
+#tracerPlugin .request-info {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #tracerPlugin .download-button {
     margin-left: 0;
     float: left;
@@ -80,7 +85,7 @@
 }
 
 #tracerPlugin input.tracer-set--package {
-
+    width: 400px !important;
 }
 
 #tracerPlugin .tracer-log-list--entry--caller-button {

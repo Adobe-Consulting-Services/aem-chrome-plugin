@@ -23,27 +23,13 @@ angular.module('aem-chrome-plugin-app')
     .controller('OptionsCtrl', [
         '$scope',
         '$timeout',
+        'OptionsService',
         function ($scope,
-                  $timeout) {
+                  $timeout,
+                  options) {
 
-            $scope.options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')) || {
-                user: 'admin',
-                password: 'admin',
-                servletContext: '',
-                tracerSets: [],
-                providedTracerSets: [],
-                tabHostOptions: []
-                /*
-                {
-                    tabHost: 'http://aem-author.local'
-                    servletContext: '/aem',
-                    user: 'admin',
-                    password: 'admin',
-                    tracerHosts: [ { origin: 'http://192.168.0.1' }, { origin: 'http://192.168.0.2' } ]
-                }
-                */
-            };
-            
+            $scope.options = options.getOptions();
+    
             if (!$scope.options.tracerSets || $scope.options.tracerSets.length === 0) {
                 $scope.options.tracerSets = [];
             }       
@@ -58,26 +44,28 @@ angular.module('aem-chrome-plugin-app')
                $scope.options.providedTracerSets.push({
                     enabled: true,
                     package: 'org.apache.jackrabbit.oak.query',
-                    level: 'DEBUG'                    
+                    level: 'DEBUG',
+                    caller: ''                   
                 });
                 $scope.options.providedTracerSets.push({
                     enabled: false,
                     package: 'org.apache.jackrabbit.oak.jcr.operations.writes',
-                    level: 'TRACE'                
+                    level: 'TRACE',
+                    caller: ''
                 });                   
             }
             
             $scope.$watch('options', function (value) {
-                var options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options')) || {};
+                var tmp = options.getOptions();
                 
-                options.user = value.user || '';
-                options.password = value.password || '';
-                options.servletContext = value.servletContext || '';
-                options.tracerSets = value.tracerSets || [];
-                options.providedTracerSets = value.providedTracerSets || [];
-                options.tabHostOptions = value.tabHostOptions || [];
+                tmp.user = value.user || '';
+                tmp.password = value.password || '';
+                tmp.servletContext = value.servletContext || '';
+                tmp.tracerSets = value.tracerSets || [];
+                tmp.providedTracerSets = value.providedTracerSets || [];
+                tmp.tabHostOptions = value.tabHostOptions || [];
 
-                localStorage.setItem('aem-chrome-plugin.options', JSON.stringify(options));
+                options.setOptions(tmp);
             }, true);      
 
             $scope.addTabHostOptionTracerHost = function(tabHostOption) {
