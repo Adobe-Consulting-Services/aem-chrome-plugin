@@ -298,7 +298,8 @@
                                     <!-- Logger Names -->
                                     <li class="tabbed-pane-header-tab"
                                         ng-show="activeTracerData.loggerNames.length > 0">
-                                      <a href="#tab-logger-names" class="tabbed-pane-header-tab-title">Logger Names</a></span>
+                                      <a href="#tab-logger-names" class="tabbed-pane-header-tab-title">Logger Names
+                                            <span ng-show="activeTracerData.loggerNames">({{ activeTracerData.loggerNames.length }})</span></a>
                                     </li>
                                 </ul>
                             </div>

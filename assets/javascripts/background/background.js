@@ -26,10 +26,7 @@ var tracer = (function(global){
         tabs = {},
         api = {},
         activationCallback,
-        deactivationCallback,
-        currentTabIsTraceable = true,
-        lastGoodTabOrigin = '',
-        lastTestedTabOrigin = '';
+        deactivationCallback;
 
     api.registerTab = function(tabId){
         console.assert(typeof tabId !== 'undefined');
@@ -104,9 +101,11 @@ if (!localStorage.getItem('aem-chrome-plugin.options')) {
 // An array of all the connections
 var ports =[];
 chrome.runtime.onConnect.addListener(function(port) {
+    var tabId;
+
     console.assert(port.name == "aem-chrome-plugin");
     ports.push(port);
-    var tabId;
+    
     port.onMessage.addListener(function(msg) {
         var action = msg.action;
         if (action === "register"){
@@ -116,10 +115,11 @@ chrome.runtime.onConnect.addListener(function(port) {
     });
 
     port.onDisconnect.addListener(function(msg){
+        var index;
         if (typeof tabId !== 'undefined') {
             tracer.unregisterTab(tabId);
-        //remove the port when the devtools panel is disconnected.
-        var index = ports.indexOf(port);
+            //remove the port when the devtools panel is disconnected.
+            index = ports.indexOf(port);
             ports.splice(index,1);
         }
     });
@@ -135,20 +135,18 @@ function sendToDevTools(msg){
 }
 
 /**
- * Listen for messages from the devtools panel. Supported message types are:
- * > message.action => getSlingTracerJSON
- * > message.action => updateURLFilter
+ * Listen for messages from the devtools panel.
  **/
 chrome.runtime.onMessage.addListener(
   function(message, sender, callback) {
     if (message.action === 'getSlingTracerJSON') {
-      getSlingTracerJSON(message.requestId, callback);
+      getSlingTracerJSON(message.requestId, message.tabId, callback);
       return true;
     } else if (message.action === 'updateURLFilter') {
       // sync the urlFilter from AEMPanel to background.js
       urlFilter = (message.urlFilter || '').trim();
     } else if (message.action === 'isAEMReadyForLogTracer') {
-      isAEMReadyForLogTracer(callback);
+      isAEMReadyForLogTracer(message.tabId, callback);
       return true;
     } else if(message.action === "af-editor-loaded"){
         sendToDevTools(message);
@@ -159,35 +157,28 @@ chrome.runtime.onMessage.addListener(
 /**
  * Make XHR to determine if the Sling Log Tracer is accepting requests.
  **/
-function isAEMReadyForLogTracer(callback) {
-    var SLING_TRACER_URL = '/system/console/tracer';
-
-     getWithAuthenticatedAjax(SLING_TRACER_URL, function(data) {
+function isAEMReadyForLogTracer(tabId, callback) {
+    getWithAuthenticatedAjax(tabId, '/system/console/tracer', function(data) {
         // Return true on success
-        tracer.currentTabIsTraceable = data !== null;
-        console.log('Current tab is found to traceable: ' + tracer.currentTabIsTraceable);
-        if (tracer.currentTabIsTraceable) {
-            tracer.lastGoodTabOrigin = tracer.lastTestedTabOrigin;
-        }
-        callback(tracer.currentTabIsTraceable);
-     });
+        callback(data !== null);
+    });
 }
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
  **/
-function getSlingTracerJSON(requestId, callback) {
+function getSlingTracerJSON(requestId, tabId, callback) {
     console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
   
     // Servlet context can be supported by adding to the options.host configuration
-    getWithAuthenticatedAjax('/system/console/tracer/' + requestId + '.json', function(data) {
+    getWithAuthenticatedAjax(tabId, '/system/console/tracer/' + requestId + '.json', function(data) {
         // Return true on success
         callback(data);
     });
 }
 
-function getWithAuthenticatedAjax(url, callback) {
-  getOptions(function (options) {
+function getWithAuthenticatedAjax(tabId, url, callback) {
+  getOptions(tabId, function (options) {
       var uri;
       
       if (!options || options == null) { 
@@ -220,36 +211,19 @@ function getWithAuthenticatedAjax(url, callback) {
   });
 }
 
-function getOptions(callback) {
-    var tabOrigin = tracer.lastGoodTabOrigin;//'http://localhost:4502';
-
+function getOptions(tabId, callback) {
     // Get the origin of the active window
-    if (chrome && chrome.tabs && chrome.tabs.query) {
-        chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {
-            var url;
-
-            if (tabs && tabs.length === 1) {
-                url = new URL(tabs[0].url);
-                tabOrigin = url.origin;
-                console.log('Tab Origin derived from active tab: ' + tabOrigin);
-
-                tracer.lastTestedTabOrigin = tabOrigin;
-                $.each(getHttpParams(tabOrigin), function (index, httpParam) {
-                    callback(httpParam);
-                });
-            } else {
-                console.log('No active tabs found. Could not derive actual Tab Origin defaulting to last known tab origin: ' + tabOrigin);
-                $.each(getHttpParams(tabOrigin), function (index, httpParam) {
-                    callback(httpParam);
-                });
-            }
-        });
-    } else {
-        console.log('Chrome Tabs object could not be found. It is likely this dev panel lost associated with any tab. Please close AEM Chrome Plug-in and open it docked to a Chrome Tab. Defaulting to last known tab origin: ' + tabOrigin);
-        $.each(getHttpParams(tabOrigin), function (index, httpParam) {
-            callback(httpParam);
-        });
-    }
+    chrome.tabs.get(tabId, function (tab) {        
+        if (tab) {
+            var url = new URL(tab.url);
+            $.each(getHttpParams(url.origin), function (index, httpParam) {
+                callback(httpParam);
+            });
+        } else {
+            console.log('Unable to find tab associated with tabId ' + tabId);
+            callback(null);
+        }
+    });
 }
 
 function getHttpParams(tabOrigin) {
@@ -306,10 +280,7 @@ function getParam(origin, servletContext, user, password) {
 var injectHeaderListener = function (details) {
   var options;
 
-  if (!tracer.currentTabIsTraceable) {
-      // Current tab does not have a backing Sling Log Tracer endpoint so dont bother with this request.
-      return;
-  } else if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
+  if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
       // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
       return;
   } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
@@ -319,9 +290,9 @@ var injectHeaderListener = function (details) {
 
   console.log('Adding Sling-Tracer headers for: ' + details.url);
 
-  options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
-
   if (tracer.shouldInjectHeaders(details.tabId)) {
+    options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
+      
     details.requestHeaders.push({
       name: 'Sling-Tracer-Record',
       value: 'true'

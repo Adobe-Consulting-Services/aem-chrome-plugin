@@ -41,13 +41,12 @@ angular.module('aem-chrome-plugin-app')
             console.log("Requesting Sling Tracer JSON for: " + chromeRequest.request.url);
             chrome.runtime.sendMessage({
                 action: 'getSlingTracerJSON',
-                requestId: request.key
+                requestId: request.key,
+                tabId: chrome.devtools.inspectedWindow.tabId
               },
               function(data) {
                 if (data) {
                   scope.processRequest(request, data);
-                  // TODO: Better added to a directive
-                  $('.data-container').scrollTop(100000000);
                 } else {
                   console.log('Unable to collect Sling Log Tracer data');                    
                 }

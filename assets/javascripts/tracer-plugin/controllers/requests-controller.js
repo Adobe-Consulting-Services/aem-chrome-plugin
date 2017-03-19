@@ -89,7 +89,8 @@ angular.module('aem-chrome-plugin-app')
                 
                 if (chrome && chrome.runtime) {
                     console.log("Dev Panel is attached to Chrome; Making XHR to check if AEM is ready");
-                    chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer'}, function (success) {
+                    chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer', 
+                                                tabId: chrome.devtools.inspectedWindow.tabId}, function (success) {
                         $scope.ready = success;
                         $timeout(0);                            
 
@@ -169,6 +170,11 @@ angular.module('aem-chrome-plugin-app')
                 $scope.removeRequests($scope.getMaxRequests());
 
                 $timeout(0);
+                
+                $timeout(function() { 
+                    $('.data-container').scrollTop(100000000);
+                }, 10);
+                //$timeout(0);
             };
 
             $scope.removeRequests = function (max) {
