@@ -25,7 +25,8 @@
 
     window.addEventListener('af-editor-loaded.afPlugin', function () {
         chrome.runtime.sendMessage({url: window.location.href, action: "af-editor-loaded"}, function (response) {
-            console.log(response);
+            // Reduce console.log clutter
+            // console.log(response);
         });
     });
 })();
