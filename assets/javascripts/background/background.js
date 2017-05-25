@@ -148,7 +148,7 @@ chrome.runtime.onMessage.addListener(
     } else if (message.action === 'isAEMReadyForLogTracer') {
       isAEMReadyForLogTracer(message.tabId, callback);
       return true;
-    } else if(message.action === "af-editor-loaded"){
+    } else if (message.action === "af-editor-loaded"){
         sendToDevTools(message);
     }
   }
@@ -186,18 +186,20 @@ function getWithAuthenticatedAjax(tabId, url, callback) {
           callback(null); 
           return;
       }
-      
+
       uri = options.url(url);
 
       $.ajax({
           url: uri,
           method: 'GET',
           beforeSend: function(xhr) {
-              xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+              if (options.user && options.password) {
+                  xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+              }
           }
       }).always(function(data, status) {
           if (callback) {
-              console.log('AJAX Request made to: ' + uri + ' -> ' + status);
+              console.log('AJAX Request made to [ ' + uri + ' ]  -> [ ' + status + ' ]');
               
               if (status !== 'success') {
                   data = null;
@@ -236,6 +238,7 @@ function getHttpParams(tabOrigin) {
 
     // Prevents errors in timing corner cases    
     options.tabHostOptions = options.tabHostOptions || [];
+
     $.each(options.tabHostOptions, function(index, tabHostOption) {
         // Check if the tab's origin matches a tab host option configuration
         if (tabOrigin === stripTrailingSlash(tabHostOption.tabHost) && params.length === 0) {
@@ -282,7 +285,15 @@ var injectHeaderListener = function (details) {
 
   if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
       // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
-      return;
+      // However, remove all Cookies so the basic auth can be sent
+
+      for (var i = 0; i < details.requestHeaders.length; ++i) {
+          if (details.requestHeaders[i].name === 'Cookie') {
+              details.requestHeaders.splice(i, 1);
+              break;
+          }
+      }
+      return {requestHeaders: details.requestHeaders};
   } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
       // URL does not match the AEM Panel urlFilter; Do not add headers.
       return;
@@ -300,9 +311,10 @@ var injectHeaderListener = function (details) {
 
     var callerEnabled = options.callerEnabled;
     var tracerSets = [];
+
     $.each(options.providedTracerSets, function(index, value) {
         var tracerSetConfig;
-        console.log(value);
+
       if (value.enabled && value.package) {
           tracerSetConfig = value.package;
           tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
@@ -315,8 +327,7 @@ var injectHeaderListener = function (details) {
       
     $.each(options.tracerSets, function(index, value) {
         var tracerSetConfig;
-        console.log(value);
-        
+
       if (value.enabled && value.package) {
           tracerSetConfig = value.package;
           tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
