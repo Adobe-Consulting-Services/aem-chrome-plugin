@@ -34,12 +34,16 @@ document.addEventListener("DOMContentLoaded", function () {
      *   So, we set a flag (editorFrameLoaded) on window. In authorUtils, we evaluate this flag
      *   on the console and display the authoring frame.
      */
-    if(window.jQuery) {
-        $(document).on("cq-editor-loaded", function () {
-            window.editorFrameLoaded = true;
-            window.dispatchEvent(new Event('af-editor-loaded.afPlugin'));
-            addAuthoringUtils();
-        });
+    try {
+        if ($) {
+            $(document).on("cq-editor-loaded", function () {
+                window.editorFrameLoaded = true;
+                window.dispatchEvent(new Event('af-editor-loaded.afPlugin'));
+                addAuthoringUtils();
+            });
+        }
+    } catch(err) {
+        // Do not bother user with errors as this script can be injected in unexpected contexts (though we try not to).
     }
 });
 
