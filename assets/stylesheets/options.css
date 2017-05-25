@@ -36,14 +36,17 @@ label p {
   font-weight: normal;
 }
 
-.form-options input[type=text] {
+.form-options input[type=text],
+.form-options input[type=password] {
+
   width: 100%;
   padding: 1rem;
 }
 
 
+.host-options ul li input[type=text],
+.host-options ul li input[type=password] {
 
-.host-options ul li input[type=text] {
   width: 60%;
 }
 

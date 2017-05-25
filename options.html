@@ -57,17 +57,22 @@
             Servlet context
             <br/>
             <input type="text" ng-model="options.servletContext"/>
-          </label>
+        </label>
+
+        <p>
+            Note that existing login-tokens associated w/ the tab's host will override these settings.
+        </p>
+
         <label class="text">
             Web console user
             <br/>
             <input type="text" ng-model="options.user"/>
-          </label>
+        </label>
         <label class="text">
             Web console password
             <br/>
-            <input type="text" ng-model="options.password"/>
-          </label>
+            <input type="password" ng-model="options.password"/>
+        </label>
       </form>
 
       <h3>Host Configurations</h3>
@@ -115,7 +120,7 @@
         <label class="text">
             Web console password
             <br/>
-            <input type="text" ng-model="tabHostOption.password"/>
+            <input type="password" ng-model="tabHostOption.password"/>
           </label>
 
         <button ng-click="options.tabHostOptions.splice($index, 1)">Remove this Host Configuration</button>
