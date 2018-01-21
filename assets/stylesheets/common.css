@@ -78,3 +78,7 @@ code {
   padding: 1rem;
   display: block;
 }
+
+.tabbed-pane-header-tab-title {
+  display: inline;
+}
