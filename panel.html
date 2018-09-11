@@ -185,9 +185,14 @@
 
                         <p>AEM Chrome Plug-in could not establish a connection to Sling Log Tracer for this Chrome Tab.</p>
 
-                        <button ng-click="checkReadiness(false)">Check this Chrome Tab for Sling Log Tracer Readiness</button>
-                        
-                        <p>Please follow the setup instructions at:</p>
+                        <p>Click the button below to (try to) automatically enable Sling Log Tracer.</p>
+
+                        <!--<button ng-click="checkReadiness(false)">Check this Chrome Tab for Sling Log Tracer Readiness</button>-->
+
+                        <button class="cta" ng-click="enableSlingTracer()">Enable Sling Log Tracer in AEM</button>
+
+                        <br/><br/>
+                        <p>If the automatic setup fails, check the web console credentials, host and context in the AEM Chrome Plugin's options, and/or follow the setup instructions at:</p>
 
                         <ul style="margin-left: .5rem;">
                             <li><strong>
@@ -195,6 +200,7 @@
                                 </strong></li>
                         </ul>
 
+                        <!--
                         <p>
                             <br/>
                             <br/>
@@ -202,6 +208,7 @@
                             Ensure AEM Chrome Plug-in is started DOCKED to the Chrome tab that has AEM (with Sling Log Tracer enabled) opened.
                             </strong>
                         </p>
+                        -->
                     </div>
                 </div>
 
@@ -236,6 +243,7 @@
                                 <th class="status">Status</th>
                                 <th class="url">URL</th>
                                 <th class="method">Method</th>
+                                <th class="numQueries">Queries</th>
                                 <th class="duration">Resp. Time</th>
                             </tr>
                         </table>
@@ -248,12 +256,14 @@
                                     <td class="status">{{ request.response.status }}</td>
                                     <td class="url ellipsis">{{ request.request.url | removeHost }}</td>
                                     <td class="method">{{ request.request.method }}</td>
+                                    <td class="numQueries">{{ request.tracerData.queries.length }}</td>
                                     <td class="duration">{{ request.time | number: 0 }}ms</td>
                                 </tr>
                                 <tr class="filler">
                                     <td class="status"></td>
                                     <td class="url"></td>
                                     <td class="method"></td>
+                                    <td class="numQueries"></td>
                                     <td class="duration"></td>
                                 </tr>
                             </table>

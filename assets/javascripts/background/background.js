@@ -19,7 +19,7 @@
  */
 
 var urlFilter = '';
-
+var PLUGIN_HEADER = "From-AEM-Chrome-Plugin";
 var tracer = (function(global){
     var tabCount = 0,
         listenerRegistered = false,
@@ -64,7 +64,6 @@ var tracer = (function(global){
 
     return api;
 }(this));
-
 
 /**
  * Options Initialization
@@ -148,6 +147,9 @@ chrome.runtime.onMessage.addListener(
     } else if (message.action === 'isAEMReadyForLogTracer') {
       isAEMReadyForLogTracer(message.tabId, callback);
       return true;
+    } else if (message.action === 'enableSlingTracer') {
+        enableSlingTracer(message.tabId, callback);
+        return true;
     } else if (message.action === "af-editor-loaded"){
         sendToDevTools(message);
     }
@@ -158,10 +160,10 @@ chrome.runtime.onMessage.addListener(
  * Make XHR to determine if the Sling Log Tracer is accepting requests.
  **/
 function isAEMReadyForLogTracer(tabId, callback) {
-    getWithAuthenticatedAjax(tabId, '/system/console/tracer', function(data) {
+    requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer', function(data) {
         // Return true on success
         callback(data !== null);
-    });
+    }, {});
 }
 
 /**
@@ -171,13 +173,34 @@ function getSlingTracerJSON(requestId, tabId, callback) {
     console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
   
     // Servlet context can be supported by adding to the options.host configuration
-    getWithAuthenticatedAjax(tabId, '/system/console/tracer/' + requestId + '.json', function(data) {
+    requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer/' + requestId + '.json', function(data) {
         // Return true on success
         callback(data);
-    });
+    }, {});
 }
 
-function getWithAuthenticatedAjax(tabId, url, callback) {
+function enableSlingTracer(tabId, callback) {
+    console.log('Enabling Sling Tracer on AEM');
+
+    requestWithAuthenticatedAjax(tabId, 'GET', '/libs/granite/csrf/token.json', function(csrfData) {
+        var params = {
+            apply: true,
+            propertylist: "enabled,servletEnabled",
+            enabled: true,
+            servletEnabled: true,
+            ':cq_csrf_token': csrfData.token
+        };
+
+        // Servlet context can be supported by adding to the options.host configuration
+        requestWithAuthenticatedAjax(tabId, 'POST', '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer', function(data) {
+            // Return true on success
+            callback(false);
+        }, params);
+    }, {});
+}
+
+
+function requestWithAuthenticatedAjax(tabId, method, url, callback, params) {
   getOptions(tabId, function (options) {
       var uri;
       
@@ -191,15 +214,17 @@ function getWithAuthenticatedAjax(tabId, url, callback) {
 
       $.ajax({
           url: uri,
-          method: 'GET',
+          method: method,
+          data: params,
           beforeSend: function(xhr) {
               if (options.user && options.password) {
+                  xhr.setRequestHeader(PLUGIN_HEADER, true);
                   xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
               }
           }
       }).always(function(data, status) {
           if (callback) {
-              console.log('AJAX Request made to [ ' + uri + ' ]  -> [ ' + status + ' ]');
+              console.log(method + ' AJAX Request made to [ ' + uri + ' ]  -> [ ' + status + ' ]');
               
               if (status !== 'success') {
                   data = null;
@@ -281,9 +306,19 @@ function getParam(origin, servletContext, user, password) {
  * This method injects the Sling Log Tracer headers into browser requests indicating how they must be traced.
  **/
 var injectHeaderListener = function (details) {
-  var options;
+  var options,
+      felixTracerConsoleUrl = '/system/console/tracer.json',
+      felixTracerConfigUrl = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer';
 
-  if (details.url && details.url.indexOf('/system/console/tracer') !== -1){
+    var isPluginRequest = false;
+    for (var i = 0; i < details.requestHeaders.length; ++i) {
+        if (details.requestHeaders[i].name === PLUGIN_HEADER) {
+            isPluginRequest = true;
+            break;
+        }
+    }
+
+  if (isPluginRequest) {
       // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
       // However, remove all Cookies so the basic auth can be sent
 
@@ -293,6 +328,12 @@ var injectHeaderListener = function (details) {
               break;
           }
       }
+
+      if (details.method === 'POST') {
+          // Set to some localhost to get around AEM Referrer filter
+          details.requestHeaders.push({name: "Referer", value:  'http://localhost:4502'});
+      }
+
       return {requestHeaders: details.requestHeaders};
   } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
       // URL does not match the AEM Panel urlFilter; Do not add headers.
@@ -353,6 +394,7 @@ var injectHeaderListener = function (details) {
 
   return { requestHeaders: details.requestHeaders };
 };
+
 
 /**
  * Activate/Deactivate Sling-Tracer injection listeners

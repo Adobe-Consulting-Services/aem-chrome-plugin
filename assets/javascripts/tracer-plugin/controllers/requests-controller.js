@@ -117,6 +117,14 @@ angular.module('aem-chrome-plugin-app')
                 }     
             };
 
+            $scope.enableSlingTracer = function() {
+                chrome.runtime.sendMessage({
+                    action: 'enableSlingTracer',
+                    tabId: chrome.devtools.inspectedWindow.tabId
+                }, $scope.checkReadiness);
+            };
+
+
             $scope.requests = function () {
                 return $scope.requestKeys.map(function (key) {
                     return $scope.requests[key];
