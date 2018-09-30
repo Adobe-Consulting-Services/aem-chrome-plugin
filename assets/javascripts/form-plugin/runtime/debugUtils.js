@@ -59,7 +59,11 @@
         },
 
         buildTree: function (obj, $parent) {
-            _.each(obj.items, function (value, key) {
+            var listOfChildren = obj.items;
+            if(obj.hasOwnProperty("toolbar")){
+                listOfChildren['toolbar'] = obj.toolbar
+            }
+            _.each(listOfChildren, function (value, key) {
                 var list = $("<ul/>").addClass('af-tree-ul');
                 afPluginRuntime.buildTreeItem(value, list);
                 $parent.append(list);
