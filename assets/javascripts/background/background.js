@@ -402,7 +402,7 @@ var injectHeaderListener = function (details) {
 tracer.registerListener(/*activate*/ function () {
     chrome.webRequest.onBeforeSendHeaders.addListener(injectHeaderListener,
       {urls: ["<all_urls>"]},
-      ['blocking', 'requestHeaders']
+      ['blocking', 'requestHeaders', 'extraHeaders']
     );
     console.log("Registered the Sling Header injecting listener");
   },
