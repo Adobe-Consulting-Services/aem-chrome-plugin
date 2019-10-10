@@ -2,7 +2,7 @@
   -webkit-box-sizing: border-box;
 }
 
-body.aem-panel {
+body.aem-panel, body.aem-chrome-plugin {
   background: #fff;
 }
 
