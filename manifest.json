@@ -1,6 +1,6 @@
 {
   "name": "AEM Chrome Plug-in",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "manifest_version": 2,
   "description": "Devtools panel for AEM development. Includes in-browser Log Tracer and Adaptive Forms development tooling",
   "devtools_page": "devtools.html",
@@ -21,7 +21,6 @@
   "web_accessible_resources": ["aem-chrome-plugin--adaptive-form--custom-script.js"],
   "permissions": [
     "tabs",
-    "storage",
     "webRequest",
     "webRequestBlocking",
     "http://*/*",

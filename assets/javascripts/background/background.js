@@ -185,7 +185,9 @@ function enableSlingTracer(tabId, callback) {
     requestWithAuthenticatedAjax(tabId, 'GET', '/libs/granite/csrf/token.json', function(csrfData) {
         var params = {
             apply: true,
+            action: 'ajaxConfigManager',
             propertylist: "enabled,servletEnabled",
+            '$location': '',
             enabled: true,
             servletEnabled: true,
             ':cq_csrf_token': csrfData.token
