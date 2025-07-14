@@ -20,396 +20,287 @@
 
 var urlFilter = '';
 var PLUGIN_HEADER = "From-AEM-Chrome-Plugin";
-var tracer = (function(global){
-    var tabCount = 0,
-        listenerRegistered = false,
-        tabs = {},
-        api = {},
-        activationCallback,
-        deactivationCallback;
+var tracer = (function(global) {
+  var tabCount = 0,
+    listenerRegistered = false,
+    tabs = {},
+    api = {},
+    activationCallback,
+    deactivationCallback;
 
-    api.registerTab = function(tabId){
-        console.assert(typeof tabId !== 'undefined');
-        tabs[tabId] = true;
-        tabCount++;
-        tabCountChanged();
-        console.log("Registered tab " + tabId);
-    };
+  api.registerTab = function(tabId) {
+    console.assert(typeof tabId !== 'undefined');
+    tabs[tabId] = true;
+    tabCount++;
+    tabCountChanged();
+    console.log("Registered tab " + tabId);
+  };
 
-    api.unregisterTab = function(tabId){
-        delete tabs[tabId];
-        tabCount--;
-        tabCountChanged();
-        console.log("Unregisterd " + tabId);
-    };
+  api.unregisterTab = function(tabId) {
+    delete tabs[tabId];
+    tabCount--;
+    tabCountChanged();
+    console.log("Unregisterd " + tabId);
+  };
 
-    api.shouldInjectHeaders = function(tabId) {
-        return tabs.hasOwnProperty(tabId);
-    };
+  api.shouldInjectHeaders = function(tabId) {
+    return tabs.hasOwnProperty(tabId);
+  };
 
-    api.registerListener = function (activate, deactivate) {
-        activationCallback = activate;
-        deactivationCallback = deactivate;
-    };
+  api.registerListener = function(activate, deactivate) {
+    activationCallback = activate;
+    deactivationCallback = deactivate;
+  };
 
-    var tabCountChanged = function () {
-        if (tabCount <= 0 && (typeof deactivationCallback !== 'undefined') && listenerRegistered){
-            deactivationCallback();
-            listenerRegistered = false;
-        } else if (tabCount > 0 && (typeof activationCallback !== 'undefined') && !listenerRegistered){
-            activationCallback();
-            listenerRegistered = true;
-        }
-    };
+  var tabCountChanged = function() {
+    if (tabCount <= 0 && typeof deactivationCallback !== 'undefined' && listenerRegistered) {
+      deactivationCallback();
+      listenerRegistered = false;
+    } else if (tabCount > 0 && typeof activationCallback !== 'undefined' && !listenerRegistered) {
+      activationCallback();
+      listenerRegistered = true;
+    }
+  };
 
-    return api;
+  return api;
 }(this));
 
 /**
  * Options Initialization
- *
- * Initialize the local storate AEM Panel options if they do not already exist.
- * This triggers for first use of the plug-in or when local storage has been cleared.
- **/
-if (!localStorage.getItem('aem-chrome-plugin.options')) {
-  localStorage.setItem('aem-chrome-plugin.options',
-      JSON.stringify({
+ * Initialize the chrome storage AEM Panel options if they do not already exist.
+ */
+function initializeOptions() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get('aem-chrome-plugin.options', function(data) {
+      if (!data['aem-chrome-plugin.options']) {
+        const defaultOptions = {
           user: 'admin',
           password: 'admin',
           tracerSets: [
-              {
-                enabled: true,
-                permanent: true,
-                package: 'org.apache.jackrabbit.oak.query',
-                level: 'DEBUG'
-              },
-              {
-                enabled: true,
-                permanent: true,
-                package: 'org.apache.jackrabbit.oak.jcr.operations.writes',
-                level: 'TRACE'
-              }
+            {
+              enabled: true,
+              permanent: true,
+              package: 'org.apache.jackrabbit.oak.query',
+              level: 'DEBUG'
+            },
+            {
+              enabled: true,
+              permanent: true,
+              package: 'org.apache.jackrabbit.oak.jcr.operations.writes',
+              level: 'TRACE'
+            }
           ],
           servletContext: '',
           maxHistory: 200
-      })
-  );
+        };
+
+        chrome.storage.local.set({'aem-chrome-plugin.options': defaultOptions}, function() {
+          resolve(defaultOptions);
+        });
+      } else {
+        resolve(data['aem-chrome-plugin.options']);
+      }
+    });
+  });
 }
-    
 
-// An array of all the connections
-var ports =[];
-chrome.runtime.onConnect.addListener(function(port) {
-    var tabId;
-
-    console.assert(port.name == "aem-chrome-plugin");
-    ports.push(port);
-    
-    port.onMessage.addListener(function(msg) {
-        var action = msg.action;
-        if (action === "register"){
-            tabId = msg.tabId;
-            tracer.registerTab(tabId);
-        }
-    });
-
-    port.onDisconnect.addListener(function(msg){
-        var index;
-        if (typeof tabId !== 'undefined') {
-            tracer.unregisterTab(tabId);
-            //remove the port when the devtools panel is disconnected.
-            index = ports.indexOf(port);
-            ports.splice(index,1);
-        }
-    });
+// Initialize options asynchronously
+initializeOptions().then(options => {
+  console.log('Options initialized:', options);
 });
 
-/*
-* This function sends the message to all the devtools panel connected to the background page
-* */
-function sendToDevTools(msg){
-    ports.forEach(function(port){
-        port.postMessage(msg);
-    });
+// An array of all the connections
+var ports = [];
+chrome.runtime.onConnect.addListener(function(port) {
+  var tabId;
+
+  console.assert(port.name == "aem-chrome-plugin");
+  ports.push(port);
+
+  port.onMessage.addListener(function(msg) {
+    var action = msg.action;
+    if (action === "register") {
+      tabId = msg.tabId;
+      tracer.registerTab(tabId);
+    }
+  });
+
+  port.onDisconnect.addListener(function() {
+    if (typeof tabId !== 'undefined') {
+      tracer.unregisterTab(tabId);
+      // remove the port when the devtools panel is disconnected.
+      const index = ports.indexOf(port);
+      ports.splice(index, 1);
+    }
+  });
+});
+
+/**
+ * This function sends the message to all the devtools panel connected to the background page
+ */
+function sendToDevTools(msg) {
+  ports.forEach(function(port) {
+    port.postMessage(msg);
+  });
 }
 
 /**
  * Listen for messages from the devtools panel.
- **/
-chrome.runtime.onMessage.addListener(
-  function(message, sender, callback) {
-    if (message.action === 'getSlingTracerJSON') {
-      getSlingTracerJSON(message.requestId, message.tabId, callback);
-      return true;
-    } else if (message.action === 'updateURLFilter') {
-      // sync the urlFilter from AEMPanel to background.js
-      urlFilter = (message.urlFilter || '').trim();
-    } else if (message.action === 'isAEMReadyForLogTracer') {
-      isAEMReadyForLogTracer(message.tabId, callback);
-      return true;
-    } else if (message.action === 'enableSlingTracer') {
-        enableSlingTracer(message.tabId, callback);
-        return true;
-    } else if (message.action === "af-editor-loaded"){
-        sendToDevTools(message);
-    }
+ */
+chrome.runtime.onMessage.addListener(function(message, sender, callback) {
+  if (message.action === 'getSlingTracerJSON') {
+    getSlingTracerJSON(message.requestId, message.tabId, callback);
+    return true;
+  } else if (message.action === 'updateURLFilter') {
+    // sync the urlFilter from AEMPanel to background.js
+    urlFilter = (message.urlFilter || '').trim();
+  } else if (message.action === 'isAEMReadyForLogTracer') {
+    isAEMReadyForLogTracer(message.tabId, callback);
+    return true;
+  } else if (message.action === 'enableSlingTracer') {
+    enableSlingTracer(message.tabId, callback);
+    return true;
+  } else if (message.action === "af-editor-loaded") {
+    sendToDevTools(message);
   }
-);
+});
 
 /**
  * Make XHR to determine if the Sling Log Tracer is accepting requests.
- **/
+ */
 function isAEMReadyForLogTracer(tabId, callback) {
-    requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer', function(data) {
-        // Return true on success
-        callback(data !== null);
-    }, {});
+  requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer', function(data) {
+    callback(data !== null);
+  }, {});
 }
 
 /**
  * Make XHR request to Sling Tracer endpoint to collect JSON data.
- **/
+ */
 function getSlingTracerJSON(requestId, tabId, callback) {
-    console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
-  
-    // Servlet context can be supported by adding to the options.host configuration
-    requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer/' + requestId + '.json', function(data) {
-        // Return true on success
-        callback(data);
-    }, {});
+  console.log('Requesting Sling Tracer information for Sling Tracer Id: ' + requestId);
+
+  requestWithAuthenticatedAjax(tabId, 'GET', '/system/console/tracer/' + requestId + '.json', function(data) {
+    callback(data);
+  }, {});
 }
 
 function enableSlingTracer(tabId, callback) {
-    console.log('Enabling Sling Tracer on AEM');
+  console.log('Enabling Sling Tracer on AEM');
 
-    requestWithAuthenticatedAjax(tabId, 'GET', '/libs/granite/csrf/token.json', function(csrfData) {
-        var params = {
-            apply: true,
-            action: 'ajaxConfigManager',
-            propertylist: "enabled,servletEnabled",
-            '$location': '',
-            enabled: true,
-            servletEnabled: true,
-            ':cq_csrf_token': csrfData.token
-        };
+  requestWithAuthenticatedAjax(tabId, 'GET', '/libs/granite/csrf/token.json', function(csrfData) {
+    var params = {
+      apply: true,
+      action: 'ajaxConfigManager',
+      propertylist: "enabled,servletEnabled",
+      '$location': '',
+      enabled: true,
+      servletEnabled: true,
+      ':cq_csrf_token': csrfData.token
+    };
 
-        // Servlet context can be supported by adding to the options.host configuration
-        requestWithAuthenticatedAjax(tabId, 'POST', '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer', function(data) {
-            // Return true on success
-            callback(false);
-        }, params);
-    }, {});
+    requestWithAuthenticatedAjax(tabId, 'POST', '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer', function(data) {
+      callback(false);
+    }, params);
+  }, {});
 }
 
-
 function requestWithAuthenticatedAjax(tabId, method, url, callback, params) {
-  getOptions(tabId, function (options) {
-      var uri;
-      
-      if (!options || options == null) { 
-          console.log('Could not derive options for the active tab (more likely there is no active tab)');
-          callback(null); 
-          return;
+  chrome.storage.local.get('aem-chrome-plugin.options', function(data) {
+    debugger;
+    const options = data['aem-chrome-plugin.options'];
+    var uri;
+
+    if (!options || options == null) {
+      console.log('Could not derive options for the active tab (more likely there is no active tab)');
+      callback(null);
+      return;
+    }
+
+    uri = options.url ? options.url(url): url;
+
+    $.ajax({
+      url: uri,
+      method: method,
+      data: params,
+      beforeSend: function(xhr) {
+        if (options.user && options.password) {
+          xhr.setRequestHeader(PLUGIN_HEADER, true);
+          xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
+        }
       }
+    }).always(function(data, status) {
+      if (callback) {
+        console.log(method + ' AJAX Request made to [ ' + uri + ' ]  -> [ ' + status + ' ]');
 
-      uri = options.url(url);
+        if (status !== 'success') {
+          data = null;
+        } else {
+          data = data || 'success';
+        }
 
-      $.ajax({
-          url: uri,
-          method: method,
-          data: params,
-          beforeSend: function(xhr) {
-              if (options.user && options.password) {
-                  xhr.setRequestHeader(PLUGIN_HEADER, true);
-                  xhr.setRequestHeader("Authorization", "Basic " + btoa(options.user + ":" + options.password));
-              }
-          }
-      }).always(function(data, status) {
-          if (callback) {
-              console.log(method + ' AJAX Request made to [ ' + uri + ' ]  -> [ ' + status + ' ]');
-              
-              if (status !== 'success') {
-                  data = null;
-              } else {
-                  data = data || 'success';
-              }
-
-              callback(data);
-          }
-      });
+        callback(data);
+      }
+    });
   });
 }
 
 function getOptions(tabId, callback) {
-    // Get the origin of the active window
-    chrome.tabs.get(tabId, function (tab) {        
-        if (tab) {
-            var url = new URL(tab.url);
-            $.each(getHttpParams(url.origin), function (index, httpParam) {
-                callback(httpParam);
-            });
-        } else {
-            console.log('Unable to find tab associated with tabId ' + tabId);
-            callback(null);
-        }
-    });
+  chrome.tabs.get(tabId, function(tab) {
+    if (tab) {
+      var url = new URL(tab.url);
+      $.each(getHttpParams(url.origin), function(index, httpParam) {
+        callback(httpParam);
+      });
+    } else {
+      console.log('Unable to find tab associated with tabId ' + tabId);
+      callback(null);
+    }
+  });
 }
 
 function getHttpParams(tabOrigin) {
-    var params = [],
-        options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
+  var params = [];
 
+  chrome.storage.local.get('aem-chrome-plugin.options', function(data) {
+    const options = data['aem-chrome-plugin.options'];
     tabOrigin = stripTrailingSlash(tabOrigin);
 
     console.log('Deriving proper AEM end-points to retrieve Sling Tracer Data from based on Tab Origin: ' + tabOrigin);
 
-    // Prevents errors in timing corner cases    
     options.tabHostOptions = options.tabHostOptions || [];
 
     $.each(options.tabHostOptions, function(index, tabHostOption) {
-        // Check if the tab's origin matches a tab host option configuration
-        if (tabOrigin === stripTrailingSlash(tabHostOption.tabHost) && params.length === 0) {
-            // Tab host option configuration is found
-            tabHostOption.tracerHosts = tabHostOption.tracerHosts || [];            
-            $.each(tabHostOption.tracerHosts, function(index, tracerHost) {
-                params.push(getParam(tracerHost.origin, tabHostOption.servletContext, tabHostOption.user, tabHostOption.password));
-            });
-        }
+      if (tabOrigin === stripTrailingSlash(tabHostOption.tabHost) && params.length === 0) {
+        tabHostOption.tracerHosts = tabHostOption.tracerHosts || [];
+        $.each(tabHostOption.tracerHosts, function(index, tracerHost) {
+          params.push(getParam(tracerHost.origin, tabHostOption.servletContext, tabHostOption.user, tabHostOption.password));
+        });
+      }
     });
 
     if (params.length === 0) {
-        params.push(getParam(tabOrigin, options.servletContext, options.user, options.password));
-    } 
+      params.push(getParam(tabOrigin, options.servletContext, options.user, options.password));
+    }
+  });
 
-    return params;
+  return params;
 }
 
 function stripTrailingSlash(str) {
-    if (!str) {
-        str = '';
-    } else if (str.indexOf("/") === str.length - 1) {
-        str.splice(str.length - 1, 1);
-    }
-    return str;
+  if (!str) {
+    str = '';
+  } else if (str.indexOf("/") === str.length - 1) {
+    str = str.slice(0, -1);
+  }
+  return str;
 }
 
 function getParam(origin, servletContext, user, password) {
-    return {
-        host: origin + (servletContext || ''),
-        user: user,
-        password: password,
-        url: function(url) {
-            return origin + (servletContext || '') + url;
-        }
-    };
+  return {
+    origin: origin,
+    servletContext: servletContext,
+    user: user,
+    password: password
+  };
 }
-
-/**
- * This method injects the Sling Log Tracer headers into browser requests indicating how they must be traced.
- **/
-var injectHeaderListener = function (details) {
-  var options,
-      felixTracerConsoleUrl = '/system/console/tracer.json',
-      felixTracerConfigUrl = '/system/console/configMgr/org.apache.sling.tracer.internal.LogTracer';
-
-    var isPluginRequest = false;
-    for (var i = 0; i < details.requestHeaders.length; ++i) {
-        if (details.requestHeaders[i].name === PLUGIN_HEADER) {
-            isPluginRequest = true;
-            break;
-        }
-    }
-
-  if (isPluginRequest) {
-      // Making call to Sling Log Tracer to get logs messages; don't inject on these requests.
-      // However, remove all Cookies so the basic auth can be sent
-
-      for (var i = 0; i < details.requestHeaders.length; ++i) {
-          if (details.requestHeaders[i].name === 'Cookie') {
-              details.requestHeaders.splice(i, 1);
-              break;
-          }
-      }
-
-      if (details.method === 'POST') {
-          // Set to some localhost to get around AEM Referrer filter
-          details.requestHeaders.push({name: "Referer", value:  'http://localhost:4502'});
-      }
-
-      return {requestHeaders: details.requestHeaders};
-  } else if (urlFilter.length > 0 && details.url.search(urlFilter) === -1) {
-      // URL does not match the AEM Panel urlFilter; Do not add headers.
-      return;
-  }
-
-  console.log('Adding Sling-Tracer headers for: ' + details.url);
-
-  if (tracer.shouldInjectHeaders(details.tabId)) {
-    options = JSON.parse(localStorage.getItem('aem-chrome-plugin.options'));
-      
-    details.requestHeaders.push({
-      name: 'Sling-Tracer-Record',
-      value: 'true'
-    });
-
-    var callerEnabled = options.callerEnabled;
-    var tracerSets = [];
-
-    $.each(options.providedTracerSets, function(index, value) {
-        var tracerSetConfig;
-
-      if (value.enabled && value.package) {
-          tracerSetConfig = value.package;
-          tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
-          if ((callerEnabled && value.caller === '') || value.caller === 'true') {
-            tracerSetConfig = tracerSetConfig + ';caller=true';
-          }
-          tracerSets.push(tracerSetConfig);
-      }
-    });
-      
-    $.each(options.tracerSets, function(index, value) {
-        var tracerSetConfig;
-
-      if (value.enabled && value.package) {
-          tracerSetConfig = value.package;
-          tracerSetConfig = tracerSetConfig + ';level=' + value.level || 'DEBUG';
-          if ((callerEnabled && value.caller === '') || value.caller === 'true') {
-            tracerSetConfig = tracerSetConfig + ';caller=true';
-          }
-          tracerSets.push(tracerSetConfig);
-      }
-    });
-
-    if (tracerSets && tracerSets.length > 0) {
-      details.requestHeaders.push({
-        name: 'Sling-Tracer-Config',
-        value: tracerSets.join(',')
-      });
-    } else {
-        details.requestHeaders.push({
-            name: 'Sling-Tracer-Config',
-            value: 'sling-tracer-configs-undefined'
-        });
-    }
-  }
-
-  return { requestHeaders: details.requestHeaders };
-};
-
-
-/**
- * Activate/Deactivate Sling-Tracer injection listeners
- **/
-tracer.registerListener(/*activate*/ function () {
-    chrome.webRequest.onBeforeSendHeaders.addListener(injectHeaderListener,
-      {urls: ["<all_urls>"]},
-      ['blocking', 'requestHeaders', 'extraHeaders']
-    );
-    console.log("Registered the Sling Header injecting listener");
-  },
-  /*deactivate*/ function () {
-    chrome.webRequest.onBeforeSendHeaders.removeListener(injectHeaderListener);
-    console.log("Removed the Sling Header injecting listener");
-  }
-);

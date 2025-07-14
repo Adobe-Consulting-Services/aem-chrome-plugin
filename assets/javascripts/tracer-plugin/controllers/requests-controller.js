@@ -20,216 +20,201 @@
 
 angular.module('aem-chrome-plugin-app')
 /** requests Controller **/
-    .controller('RequestsCtrl', [
-        '$scope',
-        '$filter',
-        '$timeout',
-        '$interval',
-        'removeHostFilter',
-        'CommunicationsService',
-        'DownloadService',
-        'TracerSetService',
-        'OptionsService',
-        function ($scope,
-                  $filter,
-                  $timeout,
-                  $interval,
-                  removeHostFilter,
-                  communications,
-                  download,
-                  tracerSet,
-                  options) {
+.controller('RequestsCtrl', [
+    '$scope', '$filter', '$timeout', '$interval', 'removeHostFilter', 'CommunicationsService', 
+    'DownloadService', 'TracerSetService', 'OptionsService',
+    function ($scope, $filter, $timeout, $interval, removeHostFilter, communications, download, tracerSet, options) {
 
-            var MAX_REQUESTS = 100;
+        var MAX_REQUESTS = 100;
 
-            // Data
-            $scope.controls = {
-                urlFilter: '.html|.json',
-                searchFilter: '',
-                maxRequests: MAX_REQUESTS
-            };
+        // Data
+        $scope.controls = {
+            urlFilter: '.html|.json',
+            searchFilter: '',
+            maxRequests: MAX_REQUESTS
+        };
 
-            $scope.activeKey = null;
-            $scope.activeRequest = {};
-            $scope.activeTracerData = {};
-            $scope.requestKeys = [];
-            $scope.requests = {};
-            $scope.ready = true;
-            $scope.showMiniOptions = false;
+        $scope.activeKey = null;
+        $scope.activeRequest = {};
+        $scope.activeTracerData = {};
+        $scope.requestKeys = [];
+        $scope.requests = {};
+        $scope.ready = true;
+        $scope.showMiniOptions = false;
                              
-            
-            /** Requests **/            
-            
-            $scope.$watch('controls.urlFilter', function (value) {
-                if (chrome && chrome.runtime) {
-                    chrome.runtime.sendMessage({action: 'updateURLFilter', urlFilter: value}, function (response) {
-                    });
-                }
-            });
+        
+        /** Requests **/            
 
-            $scope.init = function () {
-                if (chrome && chrome.runtime) {
-                    chrome.runtime.sendMessage({
-                        action: 'updateURLFilter',
-                        urlFilter: $scope.controls.urlFilter
-                    }, function (response) { 
-                        // Do nothing
-                    });
-                    
-                    $scope.checkReadiness(true);
+        $scope.$watch('controls.urlFilter', function (value) {
+            if (chrome && chrome.runtime) {
+                sendMessageToBackground({action: 'updateURLFilter', urlFilter: value});
+            }
+        });
 
-                    communications.listen($scope);                    
-                }
-            };
-
-            $scope.checkReadiness = function(repeat) {
-                var SUCCESS_WAIT = 20000,
-                    FAILURE_WAIT = 1000,
-                    interval;
+        $scope.init = function () {
+            if (chrome && chrome.runtime) {
+                sendMessageToBackground({
+                    action: 'updateURLFilter',
+                    urlFilter: $scope.controls.urlFilter
+                });
                 
-                if (chrome && chrome.runtime) {
-                    console.log("Dev Panel is attached to Chrome; Making XHR to check if AEM is ready");
-                    chrome.runtime.sendMessage({action: 'isAEMReadyForLogTracer', 
-                                                tabId: chrome.devtools.inspectedWindow.tabId}, function (success) {
-                        $scope.ready = success;
-                        $timeout(0);                            
+                $scope.checkReadiness(true);
 
-                        if (!success) {
-                            console.log('Unable to find valid Sling Log Tracer endpoint');
-                            if (repeat) {
-                                $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
-                            }
-                        } else {        
-                            console.log('Success! Found a valid Sling Log Tracer endpoint');
-                            if (repeat) {
-                                $timeout($scope.checkReadiness, SUCCESS_WAIT, true, true);
-                            }
-                        }
-                    });
-                } else {
-                    console.log("Not attached to a tab. Please attach Dev Tools to a browser window");
-                    $scope.ready = false;
+                communications.listen($scope);                    
+            }
+        };
+
+        $scope.checkReadiness = function(repeat) {
+            var SUCCESS_WAIT = 20000,
+                FAILURE_WAIT = 1000;
+
+            if (chrome && chrome.runtime) {
+                console.log("Dev Panel is attached to Chrome; Making XHR to check if AEM is ready");
+                sendMessageToBackground({action: 'isAEMReadyForLogTracer', tabId: chrome.devtools.inspectedWindow.tabId}, function(success) {
+                    $scope.ready = success;
                     $timeout(0);                            
-                    
-                    if (repeat) {
-                        $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
+
+                    if (!success) {
+                        console.log('Unable to find valid Sling Log Tracer endpoint');
+                        if (repeat) {
+                            $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
+                        }
+                    } else {        
+                        console.log('Success! Found a valid Sling Log Tracer endpoint');
+                        if (repeat) {
+                            $timeout($scope.checkReadiness, SUCCESS_WAIT, true, true);
+                        }
                     }
-                }     
-            };
-
-            $scope.enableSlingTracer = function() {
-                chrome.runtime.sendMessage({
-                    action: 'enableSlingTracer',
-                    tabId: chrome.devtools.inspectedWindow.tabId
-                }, $scope.checkReadiness);
-            };
-
-
-            $scope.requests = function () {
-                return $scope.requestKeys.map(function (key) {
-                    return $scope.requests[key];
                 });
-            };
-
-            $scope.clear = function () {
-                var key;
-                while ($scope.requestKeys.length > 0) {
-                    key = $scope.requestKeys.pop();
-                    delete $scope.requests[key];
-                }
-            };
-
-            $scope.setActive = function (requestId) {
-                $scope.activeKey = requestId;
-                $scope.activeRequest = $scope.activeKey ? $scope.requests[$scope.activeKey] : null;
-                $scope.activeTracerData = $scope.activeRequest.tracerData || null;
-            };
-
-            $scope.notEmpty = function (col) {
-                if (!col) {
-                    return false;
-                } else {
-                    return col.length > 0;
-                }
-            };
-
-            $scope.getMaxRequests = function () {
-                if (!$scope.controls.maxRequests || $scope.controls.maxRequests < 0) {
-                    return MAX_REQUESTS;
-                } else {
-                    return $scope.controls.maxRequests;
-                }
-            };
-
-            $scope.getClass = function (requestId) {
-                return (requestId === $scope.activeKey) ? 'selected' : '';
-            };
-
-            $scope.processRequest = function (request, data) {
-                request.tracerData = data;
-
-                request.tracerData.loggerNames = tracerSet.convert(request.tracerData.loggerNames);
-                request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
-                request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
-
-                $scope.requestKeys.push(request.key);
-                $scope.requests[request.key] = request;
-
-                $scope.removeRequests($scope.getMaxRequests());
-
-                $timeout(0);
+            } else {
+                console.log("Not attached to a tab. Please attach Dev Tools to a browser window");
+                $scope.ready = false;
+                $timeout(0);                            
                 
-                $timeout(function() { 
-                    $('.data-container').scrollTop(100000000);
-                }, 10);
-                //$timeout(0);
-            };
-
-            $scope.removeRequests = function (max) {
-                var key;
-                while ($scope.requestKeys.length > max) {
-                    // Remove from front of array
-                    key = $scope.requestKeys.shift();
-                    delete $scope.requests[key];
+                if (repeat) {
+                    $timeout($scope.checkReadiness, FAILURE_WAIT, true, true);
                 }
-            };
+            }     
+        };
 
-            $scope.reload = function () {
-                chrome.devtools.inspectedWindow.reload({
-                    ignoreCache: true
+        $scope.enableSlingTracer = function() {
+            sendMessageToBackground({
+                action: 'enableSlingTracer',
+                tabId: chrome.devtools.inspectedWindow.tabId
+            }, $scope.checkReadiness);
+        };
+
+        $scope.requests = function () {
+            return $scope.requestKeys.map(function (key) {
+                return $scope.requests[key];
+            });
+        };
+
+        $scope.clear = function () {
+            var key;
+            while ($scope.requestKeys.length > 0) {
+                key = $scope.requestKeys.pop();
+                delete $scope.requests[key];
+            }
+        };
+
+        $scope.setActive = function (requestId) {
+            $scope.activeKey = requestId;
+            $scope.activeRequest = $scope.activeKey ? $scope.requests[$scope.activeKey] : null;
+            $scope.activeTracerData = $scope.activeRequest.tracerData || null;
+        };
+
+        $scope.notEmpty = function (col) {
+            return col && col.length > 0;
+        };
+
+        $scope.getMaxRequests = function () {
+            return $scope.controls.maxRequests && $scope.controls.maxRequests >= 0 
+                ? $scope.controls.maxRequests 
+                : MAX_REQUESTS;
+        };
+
+        $scope.getClass = function (requestId) {
+            return (requestId === $scope.activeKey) ? 'selected' : '';
+        };
+
+        $scope.processRequest = function (request, data) {
+            request.tracerData = data;
+            request.tracerData.loggerNames = tracerSet.convert(request.tracerData.loggerNames);
+            request.tracerData.logs = $filter('logBlacklist')(request.tracerData.logs);
+            request.tracerData.queries = $filter('queryBlacklist')(request.tracerData.queries);
+
+            $scope.requestKeys.push(request.key);
+            $scope.requests[request.key] = request;
+
+            $scope.removeRequests($scope.getMaxRequests());
+
+            $timeout(0);
+            
+            $timeout(function() { 
+                $('.data-container').scrollTop(100000000);
+            }, 10);
+        };
+
+        $scope.removeRequests = function (max) {
+            var key;
+            while ($scope.requestKeys.length > max) {
+                // Remove from front of array
+                key = $scope.requestKeys.shift();
+                delete $scope.requests[key];
+            }
+        };
+
+        $scope.reload = function () {
+            chrome.devtools.inspectedWindow.reload({ ignoreCache: true });
+        };
+
+        $scope.download = function (data, name, type) {
+            var url = $scope.activeRequest.request.method 
+                        + ' ' + $scope.activeRequest.request.url;
+            download.download(data, name, url, type);
+        };
+        
+        $scope.toggleCallerEnabled = function() {
+            var tmp = options.getOptions();
+            tmp.callerEnabled = !tmp.callerEnabled;
+            options.setOptions(tmp);                
+        };
+        
+        $scope.getCallerEnabled = function() {
+            var callerEnabled = options.getOptions().callerEnabled;
+            return callerEnabled;
+        };
+
+        $scope.toggleLoggerName = function(requestTracerSet, optionsTracerSets) {
+            if (requestTracerSet && requestTracerSet.package) {
+                requestTracerSet.enabled = !requestTracerSet.enabled;
+                tracerSet.syncRequestLoggerNamesToOptions(requestTracerSet, optionsTracerSets);
+            }
+        };
+
+        $scope.syncOptionsToRequestLoggerNames = function(optionsTracerSets, requestTracerSets) {
+            tracerSet.syncOptionsToRequestLoggerNames(optionsTracerSets, requestTracerSets);
+            return requestTracerSets;
+        };
+
+        $scope.syncOptionRemovalToRequests = function(removedTracerSet, requestTracerSets) {
+            tracerSet.syncOptionRemovalToRequestLoggerNames(removedTracerSet, requestTracerSets);
+        };
+
+        // New helper function to send message and handle invalidation
+        function sendMessageToBackground(message, callback) {
+            if (chrome.runtime) {
+                chrome.runtime.sendMessage(message, function(response) {
+                    if (chrome.runtime.lastError) {
+                        console.error('Error sending message to background:', chrome.runtime.lastError);
+                    } else if (callback) {
+                        callback(response);
+                    }
                 });
-            };
-
-            $scope.download = function (data, name, type) {
-                var url = $scope.activeRequest.request.method 
-                            + ' ' + $scope.activeRequest.request.url;
-                download.download(data, name, url, type);
-            };
-            
-            $scope.toggleCallerEnabled = function() {
-                var tmp = options.getOptions();
-                tmp.callerEnabled = !tmp.callerEnabled;
-                options.setOptions(tmp);                
+            } else {
+                console.error('Chrome runtime not available. Service worker might be inactive.');
             }
-            
-            $scope.getCallerEnabled = function() {
-                var callerEnabled = options.getOptions().callerEnabled;
-                return callerEnabled;
-            }
-
-            $scope.toggleLoggerName = function(requestTracerSet, optionsTracerSets) {
-                if (requestTracerSet && requestTracerSet.package) {
-                    requestTracerSet.enabled = !requestTracerSet.enabled;
-                    tracerSet.syncRequestLoggerNamesToOptions(requestTracerSet, optionsTracerSets);
-                }
-            };
-
-            $scope.syncOptionsToRequestLoggerNames = function(optionsTracerSets, requestTracerSets) {
-                tracerSet.syncOptionsToRequestLoggerNames(optionsTracerSets, requestTracerSets);
-                return requestTracerSets;
-            };
-
-            $scope.syncOptionRemovalToRequests = function(removedTracerSet, requestTracerSets) {
-                tracerSet.syncOptionRemovalToRequestLoggerNames(removedTracerSet, requestTracerSets);
-            };
-        }]);
+        }
+    }
+]);
