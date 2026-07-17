@@ -18,21 +18,17 @@
   ~ #L%
   -->
 
-<html ng-app="aem-chrome-plugin-app">
+<html>
 
 <head>
   <link rel="stylesheet" type="text/css" href="vendor/assets/stylesheets/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="assets/stylesheets/options.css">
-  <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
-  <script src="vendor/assets/javascripts/angular.min.js"></script>
-  <script src="assets/javascripts/tracer-plugin/app.js"></script>
-  <script src="assets/javascripts/tracer-plugin/services/options-service.js"></script>    
-  <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
+  <script type="module" src="dist/options.js"></script>
   <title>AEM Chrome Plug-in | Options</title>
 </head>
 
 <body>
-  <div class="container" ng-controller="OptionsCtrl">
+  <div class="container">
     <h2>
       <img src="assets/images/aem-chrome-plugin_logo_48x48.png" /> AEM Chrome Plug-in
     </h2>
@@ -56,7 +52,7 @@
         <label class="text">
             Servlet context
             <br/>
-            <input type="text" ng-model="options.servletContext"/>
+            <input type="text" id="global-servlet-context"/>
         </label>
 
         <p>
@@ -66,12 +62,12 @@
         <label class="text">
             Web console user
             <br/>
-            <input type="text" ng-model="options.user"/>
+            <input type="text" id="global-user"/>
         </label>
         <label class="text">
             Web console password
             <br/>
-            <input type="password" ng-model="options.password"/>
+            <input type="password" id="global-password"/>
         </label>
       </form>
 
@@ -82,62 +78,20 @@
       </p>
       <p>
         <em>
-            An example of this is when 1 or many AEM instances are fronted by a single host-name that is assocated with CDN orWeb server tier. 
-            In this scenario AEM may be accessed via www.example.com however AEM Chrome Plug-in must check call AEM Publish instances directly by IP or internal host. 
+            An example of this is when 1 or many AEM instances are fronted by a single host-name that is assocated with CDN orWeb server tier.
+            In this scenario AEM may be accessed via www.example.com however AEM Chrome Plug-in must check call AEM Publish instances directly by IP or internal host.
         </em>
       </p>
 
-      <form class="form-options host-options" ng-repeat="tabHostOption in options.tabHostOptions track by $index">
-        <label class="text">
-            Host name
-            <p>Ex: http://www.example.com, https://author.internal.my-company.com</p>
-            <input type="text" ng-model="tabHostOption.tabHost"/>
-          </label>
+      <div id="host-configs"></div>
 
-        <label class="text">
-            AEM end-points
-            <p>The end-points AEM Chrome Plug-in will check for Sling Log Tracer data.</p>
-
-            <ul class="tracer-hosts">                    
-              <li ng-repeat="tracerHost in tabHostOption.tracerHosts track by $index">
-                  <input type="text" ng-model="tracerHost.origin"/>
-                  <button class="tracer-hosts--remove" ng-click="tabHostOption.tracerHosts.splice($index, 1)">Remove</button>
-              </li>
-              <li class="tracer-hosts--add"><button ng-click="addTabHostOptionTracerHost(tabHostOption)">Add</button></li>
-            </ul>
-          </label>
-
-        <label class="text">
-            Servlet context
-            <input type="text" ng-model="tabHostOption.servletContext"/>
-          </label>
-
-        <label class="text">
-            Web console user
-            <br/>
-            <input type="text" ng-model="tabHostOption.user"/>
-          </label>
-        <label class="text">
-            Web console password
-            <br/>
-            <input type="password" ng-model="tabHostOption.password"/>
-          </label>
-
-        <button ng-click="options.tabHostOptions.splice($index, 1)">Remove this Host Configuration</button>
-      </form>
-
-      <button ng-click="options.tabHostOptions.push({
-          tracerHosts: [],
-          user: 'admin',
-          password: 'admin'
-        })">Add a new Host Configuration</button>
+      <button id="add-host-configuration">Add a new Host Configuration</button>
 
     </div>
   </div>
   <div class="wrapper footer">
     <hr/>
     AEM Chrome Plug-in is inspired by and borrows from <a href="https://github.com/dejan/rails_panel">Rails Panel</a>.
-  </div>
   </div>
 </body>
 

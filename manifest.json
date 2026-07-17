@@ -1,34 +1,27 @@
 {
   "name": "AEM Chrome Plug-in",
-  "version": "0.8.0",
-  "manifest_version": 2,
-  "description": "Devtools panel for AEM development. Includes in-browser Log Tracer and Adaptive Forms development tooling",
+  "version": "2.0.0",
+  "manifest_version": 3,
+  "description": "Devtools panel for AEM development. Includes an in-browser Sling Log Tracer client.",
   "devtools_page": "devtools.html",
   "options_page": "options.html",
   "background": {
-    "scripts": [
-      "vendor/assets/javascripts/jquery-2.2.0.min.js",
-      "assets/javascripts/background/background.js"
-    ]
+    "service_worker": "dist/background.js",
+    "type": "module"
   },
-  "content_scripts": [
-      {
-          "matches": ["https://*/*", "*://*/*"],
-          "js": ["aem-chrome-plugin--adaptive-form--content-script.js"],
-          "run_at": "document_start"
-      }
-  ],
-  "web_accessible_resources": ["aem-chrome-plugin--adaptive-form--custom-script.js"],
   "permissions": [
-    "tabs",
-    "webRequest",
-    "webRequestBlocking",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
     "http://*/*",
     "https://*/*"
   ],
   "icons": {
-     "16": "assets/images/aem-chrome-plugin_logo_16x16.png",
-     "48": "assets/images/aem-chrome-plugin_logo_48x48.png",
+    "16": "assets/images/aem-chrome-plugin_logo_16x16.png",
+    "48": "assets/images/aem-chrome-plugin_logo_48x48.png",
     "128": "assets/images/aem-chrome-plugin_logo_128x128.png"
   }
 }

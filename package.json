@@ -1,0 +1,16 @@
+{
+  "name": "aem-chrome-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AEM Chrome Plug-in devtools extension",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "clean": "rm -rf dist",
+    "prepackage": "npm run build",
+    "package": "node package-extension.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

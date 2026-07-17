@@ -18,168 +18,45 @@
   ~ #L%
   -->
 
-<html ng-app="aem-chrome-plugin-app">
+<html>
   <head>
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/panel.css">
     <link rel="stylesheet" type="text/css" href="assets/stylesheets/common.css">
-      <link rel="stylesheet" type="text/css" href="assets/stylesheets/tracer-plugin/tracer.css">
-
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afCommon.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afAuthoring.css">
-    <link rel="stylesheet" type="text/css" href="assets/stylesheets/form-plugin/afRuntime.css">
-
-    <script src="vendor/assets/javascripts/jquery-2.2.0.min.js"></script>
-    <script src="vendor/assets/javascripts/underscore-min.js"></script>
-
-    <!-- Adaptive Form Plugin -->
-
-    <script src="assets/javascripts/form-plugin/namespace.js"></script>
-    <script src="assets/javascripts/form-plugin/init.js"></script>
-    <script src="assets/javascripts/form-plugin/authoring/authorUtils.js"></script>
-    <script src="assets/javascripts/form-plugin/runtime/debugUtils.js"></script>
-    <script src="assets/javascripts/form-plugin/runtime/bridgeUtils.js"></script>
-    <script src="assets/javascripts/form-plugin/runtime/bridgeApiList.js"></script>
-    <script src="assets/javascripts/form-plugin/runtime/logger.js"></script>
-    <script src="assets/javascripts/form-plugin/panel.js"></script>
-
-    <!-- Tracer Plugin -->
-
-    <script src="vendor/assets/javascripts/jquery-ui-1.9.2.tabs.min.js"></script>
-      <script src="vendor/assets/javascripts/stupidtable.min.js"></script>
-    <script src="vendor/assets/javascripts/URI.min.js"></script>
-    <script src="vendor/assets/javascripts/angular.min.js"></script>
-      <script src="assets/javascripts/tracer-plugin/helpers/tracer-log-list.js"></script>
-
-      <script src="assets/javascripts/tracer-plugin/app.js"></script>
-
-    <script src="assets/javascripts/tracer-plugin/filters/remove-host-filter.js"></script>
-    <script src="assets/javascripts/tracer-plugin/filters/log-blacklist-filter.js"></script>
-    <script src="assets/javascripts/tracer-plugin/filters/query-blacklist-filter.js"></script>
-
-    <script src="assets/javascripts/tracer-plugin/directives/dividers-directive.js"></script>
-    <script src="assets/javascripts/tracer-plugin/directives/log-list-directive.js"></script>
-    
-    <script src="assets/javascripts/tracer-plugin/services/options-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/requests-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/communications-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/download-service.js"></script>
-    <script src="assets/javascripts/tracer-plugin/services/tracer-set-service.js"></script>
-
-    <script src="assets/javascripts/tracer-plugin/controllers/requests-controller.js"></script>
-    <script src="assets/javascripts/tracer-plugin/controllers/options-controller.js"></script>
+    <link rel="stylesheet" type="text/css" href="assets/stylesheets/tracer-plugin/tracer.css">
+    <script type="module" src="dist/panel.js"></script>
   </head>
-  <body class="aem-chrome-plugin" aem-chrome-plugin-panels>
-    <div>
-        <div id="aemPluginTab" class="tabbed-pane">
-            <div class="tabbed-pane-header">
-                <div class="tabbed-pane-header-contents">
-                    <ul class="aem-plugin-tabs tabbed-pane-header-tabs">
-                        <li class="tabbed-pane-header-tab">
-                            <a href="#tracerPlugin" class="tabbed-pane-header-tab-title">Log Tracer</a>
-                        </li>
-                        <li class="tabbed-pane-header-tab">
-                            <a href="#adaptiveFormsPlugin" class="tabbed-pane-header-tab-title">Adaptive Form</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div>
-                <div class="active" id="tracerPlugin"
-                     ng-controller="RequestsCtrl"
-                     ng-init="init();">
+  <body class="aem-chrome-plugin">
+    <div id="tracerPlugin">
 
-                <div class="aem-chrome-plugin-requests-controller split-view"
-                     ng-controller="OptionsCtrl">
-                    
+                <div class="aem-chrome-plugin-requests-controller split-view">
+
 <!-- Start Inline Options -->
-<div id="mini-options" ng-show="showMiniOptions">
+<div id="mini-options">
 
-        <button class="mini-options--close"
-                ng-click="showMiniOptions = false">Close</button>
+        <button class="mini-options--close">Close</button>
 
         <div>
-            <input type="checkbox" 
-                   id="caller-enabled--checkbox"
-                   ng-checked="getCallerEnabled()" 
-                   ng-true-value="true" 
-                   ng-true-false="false"
-                   ng-click="toggleCallerEnabled()"/>
+            <input type="checkbox"
+                   id="caller-enabled--checkbox"/>
             <label for="caller-enabled--checkbox"><strong>Include caller in logs</strong> <em>(global setting; &quot;Inherit&quot; in tracer sets use this value)</em></label>
-        </div>     
-        
+        </div>
+
         <div>
             <h4>Provided Tracer Sets</h4>
-            <div class="field-wrapper">
-                <div class="tracer-set"
-                     ng-repeat="tracerSet in options.providedTracerSets track by $index">
-                    <span class="tracer-set--enabled--wrapper">
-                        <input class="tracer-set--enabled"
-                             type="checkbox" ng-model="tracerSet.enabled" ng-checked="tracerSet.enabled" ng-true-value="true" ng-true-false="false"/>
-                    </span>
-                    <input class="tracer-set--package" type="text" ng-model="tracerSet.package" readonly />
-                    
-                     <select class="tracer-set--level" ng-model="tracerSet.level">
-                        <option value="TRACE">TRACE</option>
-                        <option value="DEBUG">DEBUG</option>
-                        <option value="INFO">INFO</option>
-                        <option value="WARN">WARN</option>
-                        <option value="ERROR">ERROR</option>
-                    </select>
-                    
-                    <select class="tracer-set--caller" ng-model="tracerSet.caller">
-                        <option value="">Inherit</option>
-                        <option value="true">Include caller</option>
-                        <option value="false">Exclude caller</option>
-                    </select>
-                </div>               
-            </div>                
-                                
+            <div class="field-wrapper" id="provided-tracer-sets"></div>
+
             <h4>Ad-Hoc Tracer Sets</h4>
-            <div class="field-wrapper">
-                <div class="tracer-set"
-                     ng-repeat="tracerSet in options.tracerSets track by $index">
-                    <span class="tracer-set--enabled--wrapper">
-                        <input class="tracer-set--enabled"
-                             type="checkbox" 
-                             ng-model="tracerSet.enabled" 
-                             ng-checked="tracerSet.enabled" 
-                             ng-true-value="true" 
-                             ng-true-false="false"/>
-                    </span>
-                    
-                    <input class="tracer-set--package" type="text" ng-model="tracerSet.package" placeholder="Package"/>
-                    
-                    <select class="tracer-set--level" ng-model="tracerSet.level">
-                        <option value="TRACE">TRACE</option>
-                        <option value="DEBUG">DEBUG</option>
-                        <option value="INFO">INFO</option>
-                        <option value="WARN">WARN</option>
-                        <option value="ERROR">ERROR</option>
-                    </select>
-                    
-                    <select class="tracer-set--caller" ng-model="tracerSet.caller">
-                        <option value="">Inherit</option>
-                        <option value="true">Include caller</option>
-                        <option value="false">Exclude caller</option>
-                    </select>
-                    
-                    <button
-                            class="tracer-set--remove"
-                            ng-click="options.tracerSets.splice($index, 1); 
-                                      syncOptionRemovalToRequests(tracerSet, activeTracerData.loggerNames)">Remove
-                    </button>
-                </div>
-            </div>
-            <button class="tracer-set--add"
-                    ng-click="options.tracerSets.push({enabled: true, package:'', level:'DEBUG'})">
+            <div class="field-wrapper" id="adhoc-tracer-sets"></div>
+            <button class="tracer-set--add">
                 Add TracerSet
-            </button>               
+            </button>
         </div>
     </div>
-<!-- End Options -->                    
-                    
-                <div ng-show="!ready"
-                     class="hide-onload error-overlay">
+<!-- End Options -->
+
+                <div id="error-overlay"
+                     class="error-overlay"
+                     style="display:none">
                     <div class="error-message">
                         <h1>Attention!</h1>
 
@@ -187,9 +64,7 @@
 
                         <p>Click the button below to (try to) automatically enable Sling Log Tracer.</p>
 
-                        <!--<button ng-click="checkReadiness(false)">Check this Chrome Tab for Sling Log Tracer Readiness</button>-->
-
-                        <button class="cta" ng-click="enableSlingTracer()">Enable Sling Log Tracer in AEM</button>
+                        <button class="cta" id="enable-tracer-button">Enable Sling Log Tracer in AEM</button>
 
                         <br/><br/>
                         <p>If the automatic setup fails, check the web console credentials, host and context in the AEM Chrome Plugin's options, and/or follow the setup instructions at:</p>
@@ -199,16 +74,6 @@
                                 <a href="http://adobe-consulting-services.github.io/acs-aem-tools/aem-chrome-plugin/log-tracer/" target="_blank">AEM Chrome Plug-in documentation Web site</a>
                                 </strong></li>
                         </ul>
-
-                        <!--
-                        <p>
-                            <br/>
-                            <br/>
-                            <strong>
-                            Ensure AEM Chrome Plug-in is started DOCKED to the Chrome tab that has AEM (with Sling Log Tracer enabled) opened.
-                            </strong>
-                        </p>
-                        -->
                     </div>
                 </div>
 
@@ -218,24 +83,24 @@
                         <div class="control-bar">
                               <span class="control-url-filter">
                                 <input class="control-filter" type="text"
-                                       placeholder="URL Filter"
-                                       ng-model="controls.urlFilter"/>
+                                       id="url-filter-input"
+                                       placeholder="URL Filter"/>
                               </span>
                               <span class="control-search-filter">
                                 <input class="control-filter" type="text"
-                                       placeholder="Search"
-                                       ng-model="controls.searchFilter"/>
+                                       id="search-filter-input"
+                                       placeholder="Search"/>
                               </span>
                               <span class="control-max-requests">
-                                {{ requestKeys.length }} / <input type="number"
-                                                  min="0"
-                                                  ng-model="controls.maxRequests"/>
+                                <span id="request-count">0</span> / <input type="number"
+                                                  id="max-requests-input"
+                                                  min="0"/>
                               </span>
                               <span class="control-clear">
-                                <input type="button" value="Clear" ng-click="clear()"/>
+                                <input type="button" id="clear-button" value="Clear"/>
                               </span>
                               <span class="control-reload">
-                                <input type="button" value="Reload" ng-click="reload()"/>
+                                <input type="button" id="reload-button" value="Reload"/>
                               </span>
                         </div>
                         <table class="header">
@@ -249,23 +114,7 @@
                         </table>
                         <div class="data-container">
                             <table id="requests">
-                                <tr ng-repeat="request in requests() | filter: {request: {url: controls.searchFilter}} track by $index "
-                                    ng-click="setActive(request.key)"
-                                    ng-class="getClass(request.key)">
-
-                                    <td class="status">{{ request.response.status }}</td>
-                                    <td class="url ellipsis">{{ request.request.url | removeHost }}</td>
-                                    <td class="method">{{ request.request.method }}</td>
-                                    <td class="numQueries">{{ request.tracerData.queries.length }}</td>
-                                    <td class="duration">{{ request.time | number: 0 }}ms</td>
-                                </tr>
-                                <tr class="filler">
-                                    <td class="status"></td>
-                                    <td class="url"></td>
-                                    <td class="method"></td>
-                                    <td class="numQueries"></td>
-                                    <td class="duration"></td>
-                                </tr>
+                                <tbody id="requests-tbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -276,15 +125,13 @@
                         <div id="hdivider"></div>
                         <div class="request-info">
                             <button
-                                    class="mini-options--button"
-                                    ng-click="showMiniOptions = !showMiniOptions">Tracer Sets
+                                    class="mini-options--button">Tracer Sets
                             </button>
 
-                            <span ng-hide="activeRequest">
+                            <span id="no-active-request-message">
                               Select a request to see the details
                             </span>
-                            <span ng-show="activeRequest">
-                              {{ activeRequest.request.method }} {{ activeRequest.request.url | removeHost }}
+                            <span id="active-request-title" style="display:none">
                             </span>
                         </div>
                         <div class="tabbed-pane-header">
@@ -293,23 +140,22 @@
                                     <!-- Log Tab -->
                                     <li class="tabbed-pane-header-tab">
                                         <a href="#tab-log" class="tabbed-pane-header-tab-title">Log
-                                            <span ng-show="activeTracerData.logs">({{ activeTracerData.logs.length }})</span></a>
+                                            <span id="log-count-badge" style="display:none"></span></a>
                                     </li>
                                     <!-- Request Progress -->
                                     <li class="tabbed-pane-header-tab">
                                         <a href="#tab-request-progress" class="tabbed-pane-header-tab-title">Request Progress
-                                            <span ng-show="activeTracerData.requestProgressLogs">({{ activeTracerData.requestProgressLogs.length }})</span></a>
+                                            <span id="request-progress-count-badge" style="display:none"></span></a>
                                     </li>
                                     <!-- Queries Tab -->
                                     <li class="tabbed-pane-header-tab">
                                         <a href="#tab-queries" class="tabbed-pane-header-tab-title">Queries
-                                            <span ng-show="activeTracerData.queries">({{ activeTracerData.queries.length }})</span></a>
+                                            <span id="queries-count-badge" style="display:none"></span></a>
                                     </li>
                                     <!-- Logger Names -->
-                                    <li class="tabbed-pane-header-tab"
-                                        ng-show="activeTracerData.loggerNames.length > 0">
+                                    <li class="tabbed-pane-header-tab" id="logger-names-tab" style="display:none">
                                       <a href="#tab-logger-names" class="tabbed-pane-header-tab-title">Logger Names
-                                            <span ng-show="activeTracerData.loggerNames">({{ activeTracerData.loggerNames.length }})</span></a>
+                                            <span id="logger-names-count-badge" style="display:none"></span></a>
                                     </li>
                                 </ul>
                             </div>
@@ -317,103 +163,78 @@
 
                         <div class="tabbed-pane-content data-grid data-grid-details">
                             <!-- Log Tab Panel -->
-                            <div id="tab-log">
+                            <div id="tab-log" class="active">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
                                         <button
                                                 class="download-button"
-                                                ng-show="notEmpty(activeTracerData.logs)"
-                                                ng-click="download(activeTracerData.logs, 'logs')">Download</button>
+                                                id="log-download-button"
+                                                style="display:none">Download</button>
 
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Search Logs"
-                                               ng-model="controls.logFilter"
-                                               ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+                                               id="log-filter-input"
+                                               placeholder="Search Logs"/>
                                     </div>
 
-                                    <div aem-chrome-plugin-log-list
-                                         id="log"
-                                         class="tracer-log-list"
-                                         format="logs"
-                                         entries="activeTracerData.logs"
-                                         filter="controls.logFilter"
-                                         ng-show="notEmpty(activeTracerData.logs)">
+                                    <div id="log"
+                                         class="tracer-log-list">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Request Progress Tab Panel -->
-                            <div id="tab-request-progress">
+                            <div id="tab-request-progress" class="inactive">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
 
                                         <button
                                                 class="download-button"
-                                                ng-show="notEmpty(activeTracerData.requestProgressLogs)"
-                                                ng-click="download(activeTracerData.requestProgressLogs, 'request-progress', 'text/plain')">Download</button>
+                                                id="request-progress-download-button"
+                                                style="display:none">Download</button>
 
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Search Request Progress"
-                                               ng-model="controls.requestProgressFilter"
-                                               ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+                                               id="request-progress-filter-input"
+                                               placeholder="Search Request Progress"/>
                                     </div>
 
-                                    <div aem-chrome-plugin-log-list
-                                         id="request-progress"
-                                         format="requestProgress"
-                                         class="tracer-log-list"
-                                         entries="activeTracerData.requestProgressLogs"
-                                         filter="controls.requestProgressFilter"
-                                         ng-show="notEmpty(activeTracerData.requestProgressLogs)">
+                                    <div id="request-progress"
+                                         class="tracer-log-list">
                                     </div>
 
                                 </div>
                             </div>
 
                             <!-- Queries Tab Panel -->
-                            <div id="tab-queries">
+                            <div id="tab-queries" class="inactive">
                                 <div class="tab-filter-container">
                                     <div class="tab-filter-wrapper">
                                         <button
                                                 class="download-button"
-                                                ng-show="notEmpty(activeTracerData.queries)"
-                                                ng-click="download(activeTracerData.queries, 'queries')">Download</button>
+                                                id="queries-download-button"
+                                                style="display:none">Download</button>
 
                                         <input class="tab-filter"
                                                type="text"
-                                               placeholder="Search Queries"
-                                               ng-model="controls.queryFilter"
-                                               ng-model-options="{ debounce: { 'default': 500, 'blur': 0 } }"/>
+                                               id="queries-filter-input"
+                                               placeholder="Search Queries"/>
                                     </div>
 
-                                    <div aem-chrome-plugin-log-list
-                                         id="queries"
-                                         class="tracer-log-list"
-                                         format="queries"
-                                         entries="activeTracerData.queries"
-                                         filter="controls.queryFilter"
-                                         ng-show="notEmpty(activeTracerData.queries)">
+                                    <div id="queries"
+                                         class="tracer-log-list">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Logger Names Tab Panel -->
-                              <div id="tab-logger-names">
-                                  <p><em> 
-                                      Only packages that have log statements in the execution path for this request display below.                                      
+                              <div id="tab-logger-names" class="inactive">
+                                  <p><em>
+                                      Only packages that have log statements in the execution path for this request display below.
                                       Check boxes to add/remove packages from Tracer Sets.
                                   </em></p>
 
-                                <ul class="logger-names--list">
-                                    <li ng-repeat="loggerName in syncOptionsToRequestLoggerNames(options.tracerSets, activeTracerData.loggerNames) track by $index">
-                                        <input type="checkbox"
-                                               ng-click="toggleLoggerName(loggerName, options.tracerSets)"
-                                               ng-checked="loggerName.enabled"/>
-                                        <label ng-click="toggleLoggerName(loggerName, options.tracerSets)">{{ loggerName.package }}</label>
-                                    </li>
-                                </ul>
+                                <ul class="logger-names--list" id="logger-names-list"></ul>
 
                               </div>
                         </div>
@@ -421,186 +242,5 @@
                 </div>
                 </div>
                 </div>
-
-                <div class="inactive" id="adaptiveFormsPlugin">
-                    <div class="afPlugin">
-
-                        <div id="authoring" class="authoring inactive" >
-                            <div>
-                                <button id="reloadAuthoringTab" class="reload-button">Reload</button>
-                            </div>
-
-                            <div class="tabbingPanel">
-                                <div class="af-tab-panelHeader">
-                                    <div>
-                                        <ul class="tabLinkList">
-                                            <li class="active"><a href="#tab-performance" id="performanceTabPanelHeader">Performance</a></li>
-                                            <li><a href="#tab-keyword-error" id="keywordTabPanelHeader">Keyword Errors</a></li>
-                                            <li><a href="#tab-bindref-error" id="bindRefTabPanelHeader">BindRef Errors</a></li>
-                                            <li><span class="linkDisabled">Logging</span></li>
-                                            <li><span class="linkDisabled">Debugger</span></li>
-                                            <li><span class="linkDisabled">Guide Bridge Playground</span></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="content-area">
-
-                                    <div id="tab-performance" class="active">
-                                        <div>
-                                            <div class="legend-text"> Error</div>
-                                            <div class="legend-icon"></div>
-                                        </div>
-
-                                        <div id="authoringTree"></div>
-                                    </div>
-
-                                    <div id="tab-keyword-error" class="inactive">
-                                        <div class="keywordError emptyable-container">
-                                           <p class="show-on-empty ok">No Keyword errors detected</p>
-
-                                           <div class="hide-on-empty">
-                                             <h3>Components with error in Name property:</h3>
-                                             <ul id="nameError" class="af-tree-ul"></ul>
-                                           </div>
-
-                                           <div class="hide-on-empty">
-                                             <h3>Components with error in Title property:</h3>
-                                             <ul id="labelError" class="af-tree-ul"></ul>
-                                           </div>
-                                        </div>
-                                    </div>
-
-                                    <div id="tab-bindref-error" class="inactive">
-                                        <div class="keywordError emptyable-container">
-                                            <p class="show-on-empty ok">No BindRef errors detected</p>
-
-                                            <div class="hide-on-empty">
-                                              <h3>Field with incorrect bindRef value:</h3>
-                                              <ul id="bindrefErrorList" class="af-tree-ul"></ul>
-                                            </div>
-
-                                            <div class="hide-on-empty">
-                                                <h3>Fields missing a bindRef property:</h3>
-                                                <ul id="noBindrefErrorList" class="af-tree-ul"></ul>
-                                            </div>
-
-                                            <div class="hide-on-empty">
-                                                <h3>Fields with incorrect minOccur value:</h3>
-                                                <ul id="minOccurErrorList" class="af-tree-ul"></ul>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div id="runtime" class="runtime inactive" >
-                            <div class="tabbingPanel">
-
-                                <div class="af-tab-panelHeader">
-                                    <div>
-                                        <ul class="tabLinkList">
-                                            <li><span class="linkDisabled">Performance</span></li>
-                                            <li><span class="linkDisabled">Keyword Errors</span></li>
-                                            <li><span class="linkDisabled">BindRef Errors</span></li>
-                                            <li class="active"><a href="#tab-af-log" id="logTabPanelHeader">Logging</a></li>
-                                            <li><a href="#tab-debug" id="debugTabPanelHeader">Debugger</a></li>
-                                            <li><a href="#tab-bridge" id="bridgeTabPanelHeader">Guide Bridge Playground</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="content-area">
-
-                                    <div id="tab-debug" class="inactive ">
-                                        <div>
-                                            <div class="runtimeComponentTree"></div>
-                                            <div class="debugListing">
-                                                <p class="tab-help">Scripts to debug:</p>
-                                                <ul id="debugList" class="af-tree-ul"></ul>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div id="tab-bridge" class="inactive">
-                                        <div>
-                                            <div class="info">
-                                                GuideBridge is bridge API that can communicate with the current Adaptive Form and manipulate or query it's state.
-                                            </div>
-
-                                            <div id="bridgeApiList">
-                                                <select id="apiListDropdown" class="emphasized-dropdown"></select>
-                                                <br/>
-
-                                                <div id="selected-api-info" class="inactive sectionInfo">
-                                                    <div id="api-description">
-                                                        <h3><span>DESCRIPTION</span></h3>
-                                                        <div id="apiDetail"></div>
-                                                    </div>
-                                                    <div id="api-parameters">
-                                                        <h3><span>PARAMETERS</span></h3>
-                                                        <div id="parameterDescription"></div>
-                                                    </div>
-                                                    <div id="api-return-type">
-                                                        <h3><span>RETURNS</span></h3>
-                                                        <div id="returnTypeDetail"></div>
-                                                    </div>
-                                                </div>
-
-                                                <div id="parameterInputList" class="inactive sectionInfo">
-                                                    <h3><span>Enter PARAMETERS</span></h3><br/>
-                                                    <div id="a" class="parameterInput"></div>
-                                                </div>
-                                                <div id="parameterExample" class="sectionInfo">
-                                                    <h3><span>EXAMPLE</span></h3>
-                                                    <code></code>
-                                                </div>
-                                                <br/>
-                                                <hr/>
-                                                <button class="run-button">Run &#9658;</button>
-                                            </div>
-                                            <div class="apiResult inactive">
-                                                <strong>Result:</strong>
-                                                <div id="bridgeApiResultValue"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div id="tab-af-log" class="active">
-                                      <div class="warning">
-                                          Enabling logs will refresh the page. Open Chrome's Console Tab to see the logs.
-                                      </div>
-
-                                      <ul class="af-log-levels">
-                                        <li><label>Enable:</label><input type="checkbox" id="enableLog" name="enableLogging" value="logging"/></li>
-                                        <li><label>Model:</label><select id="logCategory-xfa" name="xfaCategory"></select></li>
-                                        <li><label>View:</label><select id="logCategory-xfaView" name="xfaViewCategory"></select></li>
-                                        <li><label>Performance:</label><select id="logCategory-xfaPerf" name="xfaPerfCategory"></select></li>
-                                        <li><label>AF:</label><select id="logCategory-aF" name="adaptiveFormCategory"></select></li>
-                                      </ul>
-
-                                      <p>
-                                            The log configuration is made up of logger category and a corresponding log level. The different categories are Model(Scripting engine-related logs), View(Layout engine-related logs), Performance(Performance-related logs) and Adaptive Form.
-                                      </p>
-                                      <p>
-                                        In the log URL, the log configuration query string parameter is defined as follows: <strong>{a level}-{b level}-{c level}-{d level}</strong>
-                                      </p>
-                                      <p>
-                                       For example: to enable a logger to have the following settings...
-                                       <br/>
-                                            Model: INFO, Adaptive Form: ALL and OFF for other categories, the value of <strong>window.AF_log_config</strong> should be <strong>a4-b0-c0-d7</strong>
-                                      </p>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
   </body>
 </html>

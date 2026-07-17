@@ -27,9 +27,9 @@
 
 #tracerPlugin .control-bar {
     background: rgba(0, 0, 0, 0.05);
-    height: 31px;
+    height: 26px;
     border-bottom: solid 1px #ccc;
-    padding: 4px 10px;
+    padding: 2px 10px;
     overflow: hidden;
 }
 
@@ -39,13 +39,13 @@
 
 #tracerPlugin .control-bar .control-url-filter input[type=text],
 #tracerPlugin .control-bar .control-search-filter input[type=text] {
-    width: 120px;
-    padding: 3px 5px;
+    width: 110px;
+    padding: 1px 4px;
 }
 
 #tracerPlugin .control-bar .control-max-requests input[type=number] {
-    width: 50px;
-    padding: 3px 5px;
+    width: 45px;
+    padding: 1px 4px;
 }
 
 #tracerPlugin .control-bar .control-url-filter,
